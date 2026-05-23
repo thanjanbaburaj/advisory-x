@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>BR Business · Today</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+<div class="modal-ov" id="mOv">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div id="mBody"></div>
+  </div>
+</div>
+
+<div class="page">
+
+<!-- TOGGLE -->
+<div class="toggle-bar">
+  <button class="toggle-btn active" id="bizBtn" onclick="setMode('business')">💼 Business View</button>
+  <button class="toggle-btn" id="cliBtn" onclick="setMode('client')">👤 Client View</button>
+</div>
+
+<!-- HERO -->
+<div class="hero" style="background:linear-gradient(135deg,var(--navy),#2A5A8C);">
+  <div style="font-size:11px;opacity:0.65;text-transform:uppercase;letter-spacing:0.08em;" id="dDate"></div>
+  <div style="font-family:'Playfair Display',serif;font-size:24px;margin:6px 0 4px;" id="dGreet"></div>
+  <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;" id="dAlerts"></div>
+</div>
+
+<!-- ONE ACTION -->
+<div class="st">Your One Action</div>
+<div class="card" style="border-left:4px solid var(--gold);" id="oaCard">
+  <div style="font-size:13px;color:var(--ink3);margin-bottom:12px;">The system has analysed your pipeline. Tap a suggestion or write your own.</div>
+  <div id="oaSuggestions"></div>
+  <div class="fg" style="margin-top:12px;">
+    <label class="fl">Or write your own</label>
+    <input class="fi" id="oaInput" placeholder="Today I will..." oninput="saveOA()">
+  </div>
+  <div style="display:flex;gap:8px;margin-top:4px;">
+    <button class="btn btn-g btn-sm" onclick="doneOA()">✓ Done!</button>
+    <button class="btn btn-o btn-sm" onclick="clearOA()">Clear</button>
+  </div>
+</div>
+
+<!-- PRIORITIES -->
+<div class="st" id="priSt">Top Priorities</div>
+<div id="dPri"></div>
+
+<!-- RENEWALS -->
+<div class="st" id="renSt">Renewals Due</div>
+<div id="dRen"></div>
+
+<!-- HORA -->
+<div class="st">Current Hora</div>
+<div id="dHora"></div>
+
+<!-- WEEKLY SCORE -->
+<div class="st" id="scoreSt">This Week · Auto-counted from your logs</div>
+<div class="card" id="scoreCard">
+  <div class="wk-g" id="wkGrid"></div>
+  <div style="font-size:12px;color:var(--ink3);text-align:center;margin-top:4px;" id="wkInsight"></div>
+</div>
+
+<!-- COMMISSION SNAPSHOT -->
+<div class="st" id="commSt">Commission Snapshot</div>
+<div class="card" id="commCard">
+  <div class="stats2">
+    <div class="stat"><div class="sv" id="cmMonth">AED 0</div><div class="sl">Due This Month</div></div>
+    <div class="stat"><div class="sv" id="cmNext">AED 0</div><div class="sl">Due Next Month</div></div>
+    <div class="stat"><div class="sv" id="cmBook">AED 0</div><div class="sl">Annual Book</div></div>
+    <div class="stat"><div class="sv" id="cmTrail">AED 0</div><div class="sl">Monthly Trail</div></div>
+  </div>
+</div>
+
+</div><!-- end page -->
+
+<!-- NAVIGATION -->
+<nav class="nav">
+  <button class="nb active" onclick="location.href='today.html'"><span class="ni">🏠</span>Today</button>
+  <button class="nb" onclick="location.href='crm.html'"><span class="ni">👥</span>CRM</button>
+  <button class="nb" onclick="location.href='policies.html'"><span class="ni">📋</span>Policies</button>
+  <button class="nb" onclick="location.href='calculators.html'"><span class="ni">🧮</span>Calculate</button>
+  <button class="nb" onclick="location.href='leads.html'"><span class="ni">🎯</span>Leads</button>
+</nav>
+
+<script src="config.js"></script>
+<script src="sheets.js"></script>
+<script>
+let contacts = [], logs = [], policies = [], mode = 'business';
+
+async function init() {
+  await DB.open();
+  GS.init();
+  contacts = await DB.getAll('contacts');
+  logs      = await DB.getAll('logs');
+  policies  = await DB.getAll('policies');
+  renderAll();
+  setInterval(renderHora, 60000);
+  window.addEventListener('online', () => GS.processQueue());
+}
+
+function setMode(m) {
+  mode = m;
+  document.getElementById('bizBtn').classList.toggle('active', m === 'business');
+  document.getElementById('cliBtn').classList.toggle('active', m === 'client');
+  const bizOnly = ['scoreSt','scoreCard','commSt','commCard','priSt','renSt'];
+  bizOnly.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = m === 'business' ? '' : 'none';
+  });
+}
+
+function renderAll() {
+  renderHeader();
+  renderAlerts();
+  renderOneAction();
+  renderPriorities();
+  renderRenewals();
+  renderHora();
+  renderWeekScore();
+  renderCommission();
+}
+
+function renderHeader() {
+  const now  = new Date();
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const mths = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('dDate').textContent = `${days[now.getDay()]}, ${now.getDate()} ${mths[now.getMonth()]} ${now.getFullYear()}`;
+  const h = now.getHours();
+  const g = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('dGreet').textContent = g + ', ' + (BR_CONFIG.NAME.split(' ')[0]) + ' ✦';
+}
+
+function renderAlerts() {
+  const alerts = [];
+  // Visa countdown (hardcoded until settings module)
+  const visaDate = localStorage.getItem('br_visa_expiry');
+  if (visaDate) {
+    const d = U.daysTo(visaDate);
+    if (d <= 60) alerts.push({ label: `Visa: ${d}d`, color: d <= 30 ? '#FF6B6B' : '#FFB347' });
+  }
+  // Renewal alerts
+  const urgent = policies.filter(p => { const d = U.daysTo(p.renewal); return d !== null && d <= 30 && d >= 0; });
+  if (urgent.length) alerts.push({ label: `${urgent.length} renewal${urgent.length>1?'s':''}`, color: '#FFB347' });
+  // Online status
+  alerts.push({ label: navigator.onLine ? '● Online' : '○ Offline', color: navigator.onLine ? '#90EE90' : '#FF9999' });
+
+  document.getElementById('dAlerts').innerHTML = alerts.map(a =>
+    `<span style="background:rgba(255,255,255,0.15);padding:4px 10px;border-radius:20px;font-size:12px;color:${a.color};">${a.label}</span>`
+  ).join('');
+}
+
+function renderOneAction() {
+  // Score all contacts
+  const scored = contacts.map(c => ({ ...c, _score: calcScore(c, logs) }))
+    .sort((a,b) => b._score - a._score);
+
+  // Generate smart suggestions
+  const suggestions = [];
+  const now = new Date(); now.setHours(0,0,0,0);
+
+  // Overdue follow-ups
+  const overdue = scored.filter(c => c.followup && new Date(c.followup) <= now && c.status !== 'client').slice(0,2);
+  overdue.forEach(c => suggestions.push({
+    icon: '🔴', text: `Call ${c.name} — follow-up overdue`, score: c._score, contact: c, action: 'call'
+  }));
+
+  // Hot contacts not contacted in 3 days
+  const hotStale = scored.filter(c => {
+    if (c.status !== 'hot') return false;
+    const lastLog = logs.filter(l => l.contactId === c.id).sort((a,b) => new Date(b.date)-new Date(a.date))[0];
+    if (!lastLog) return true;
+    return (new Date() - new Date(lastLog.date)) / 86400000 > 3;
+  }).slice(0,1);
+  hotStale.forEach(c => suggestions.push({
+    icon: '🟡', text: `WhatsApp ${c.name} — Hot prospect, ${Math.round((new Date()-new Date(logs.filter(l=>l.contactId===c.id).sort((a,b)=>new Date(b.date)-new Date(a.date))[0]?.date||0))/86400000)} days since last contact`,
+    score: c._score, contact: c, action: 'wa'
+  }));
+
+  // Warm contacts on touch 2 or 3
+  const warmTouch = scored.filter(c => c.status === 'warm' && parseInt(c.touch) >= 2).slice(0,1);
+  warmTouch.forEach(c => suggestions.push({
+    icon: '🟡', text: `WhatsApp ${c.name} — Touch ${c.touch} ready · Score ${c._score}`,
+    score: c._score, contact: c, action: 'wa'
+  }));
+
+  // Renewals urgent
+  const renUrgent = policies.filter(p => { const d = U.daysTo(p.renewal); return d !== null && d <= 14 && d >= 0; }).slice(0,1);
+  renUrgent.forEach(p => {
+    const c = contacts.find(x => x.id === p.contactId);
+    if (c) suggestions.push({
+      icon: '🔴', text: `Call ${c.name} — ${p.insurer} renewal in ${U.daysTo(p.renewal)} days · AED ${Number(p.premium).toLocaleString()}`,
+      score: 95, contact: c, action: 'call'
+    });
+  });
+
+  // High score cold contact
+  const coldHigh = scored.filter(c => c.status === 'cold' && c._score > 50).slice(0,1);
+  coldHigh.forEach(c => suggestions.push({
+    icon: '🟢', text: `Reconnect with ${c.name} — High-score cold contact · Score ${c._score}`,
+    score: c._score, contact: c, action: 'wa'
+  }));
+
+  const top5 = suggestions.slice(0,5);
+
+  document.getElementById('oaSuggestions').innerHTML = top5.map((s,i) =>
+    `<div onclick="selectSuggestion(${i})" id="sug${i}" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);margin-bottom:8px;cursor:pointer;transition:all 0.2s;" class="sug-item">
+      <span style="font-size:16px;">${s.icon}</span>
+      <div style="flex:1;font-size:13px;color:var(--ink2);line-height:1.4;">${s.text}</div>
+      <button onclick="event.stopPropagation();quickAction('${s.action}','${s.contact.id}')" style="background:${s.action==='call'?'var(--sky)':'var(--wa)'};color:white;border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;">${s.action==='call'?'📞':'💬'}</button>
+    </div>`
+  ).join('') || '<div style="font-size:13px;color:var(--ink3);padding:10px 0;">Add contacts to see smart suggestions.</div>';
+
+  window._suggestions = top5;
+
+  // Load saved OA
+  const saved = localStorage.getItem('br_oa');
+  if (saved) document.getElementById('oaInput').value = saved;
+}
+
+function selectSuggestion(i) {
+  document.querySelectorAll('.sug-item').forEach((el,j) => {
+    el.style.background = j === i ? 'var(--bg3)' : '';
+    el.style.borderColor = j === i ? 'var(--gold)' : 'var(--border)';
+  });
+  const s = window._suggestions[i];
+  document.getElementById('oaInput').value = s.text;
+  saveOA();
+  toast('✓ Action selected');
+}
+
+function quickAction(type, cid) {
+  const c = contacts.find(x => x.id === cid);
+  if (!c) return;
+  if (type === 'call') {
+    if (c.phone) window.location.href = U.callLink(c.phone);
+    else toast('No phone number saved');
+  } else {
+    const msg = U.touchMsg(c);
+    if (c.phone) window.open(U.waLink(c.phone, msg));
+    else toast('No phone number saved');
+  }
+}
+
+function saveOA()  { localStorage.setItem('br_oa', document.getElementById('oaInput').value); }
+function clearOA() { localStorage.removeItem('br_oa'); document.getElementById('oaInput').value = ''; }
+function doneOA()  {
+  const val = document.getElementById('oaInput').value;
+  if (!val) { toast('Write your One Action first'); return; }
+  // Log it
+  const log = { id: U.id(), contact: 'Self', contactId: null, date: U.today(), time: U.now(), channel: 'Action', note: 'ONE ACTION COMPLETED: ' + val, tags: ['action'], created: new Date().toISOString() };
+  DB.put('logs', log).then(() => { GS.addToQueue('append', SHEETS.logs, Object.values(log)); });
+  localStorage.removeItem('br_oa');
+  document.getElementById('oaInput').value = '';
+  document.querySelectorAll('.sug-item').forEach(el => { el.style.background=''; el.style.borderColor='var(--border)'; });
+  toast('✅ One step taken. Pa showed up today.');
+}
+
+function renderPriorities() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const in3   = new Date(); in3.setDate(in3.getDate()+3); in3.setHours(0,0,0,0);
+  const pri   = contacts.filter(c => {
+    if (!c.followup) return false;
+    const d = new Date(c.followup); d.setHours(0,0,0,0);
+    return d <= in3;
+  }).sort((a,b) => new Date(a.followup)-new Date(b.followup)).slice(0,5);
+
+  const el = document.getElementById('dPri');
+  if (!pri.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-i">✅</div><div class="empty-t">No urgent follow-ups.<br>Add contacts in CRM to populate this.</div></div>';
+    return;
+  }
+  el.innerHTML = pri.map((c,i) => {
+    const d    = new Date(c.followup); d.setHours(0,0,0,0);
+    const diff = Math.round((d - today) / 86400000);
+    const due  = diff < 0 ? '⚠️ Overdue' : diff === 0 ? '🔴 Today' : diff === 1 ? '🟡 Tomorrow' : `🟢 In ${diff} days`;
+    const col  = diff <= 0 ? 'var(--red)' : diff <= 1 ? 'var(--amber)' : 'var(--sage)';
+    const score = calcScore(c, logs);
+    return `<div class="pri-i">
+      <div class="pri-r">${i+1}</div>
+      <div style="flex:1;">
+        <div style="font-size:15px;font-weight:700;color:var(--navy);">${c.name}</div>
+        <div style="font-size:13px;color:var(--ink2);">${c.company||''}${c.notes?' · '+c.notes.slice(0,40):''}</div>
+        <div style="font-size:11px;font-weight:600;color:${col};margin-top:2px;">${due} · Score ${score}</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0;">
+        ${c.phone ? `<a href="${U.callLink(c.phone)}" class="act-btn act-call btn-sm">📞</a>` : ''}
+        ${c.phone ? `<a href="${U.waLink(c.phone,U.touchMsg(c))}" target="_blank" class="act-btn act-wa btn-sm">💬</a>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderRenewals() {
+  const urgent = policies.filter(p => { const d = U.daysTo(p.renewal); return d !== null && d <= 30 && d >= 0; })
+    .sort((a,b) => U.daysTo(a.renewal) - U.daysTo(b.renewal)).slice(0,4);
+
+  const el = document.getElementById('dRen');
+  if (!urgent.length) {
+    el.innerHTML = '<div style="font-size:13px;color:var(--ink3);padding:10px 0;">No renewals in the next 30 days.</div>';
+    return;
+  }
+  el.innerHTML = urgent.map(p => {
+    const d  = U.daysTo(p.renewal);
+    const c  = contacts.find(x => x.id === p.contactId);
+    const cls = d <= 7 ? 'urgent' : d <= 14 ? 'soon' : 'ok';
+    const comm = Math.round((p.premium || 0) * (p.commissionPct || BR_CONFIG.COMMISSION.life_renewal) / 100);
+    const waMsg = U.msg(d <= 7 ? BR_CONFIG.MESSAGES.renewal_7 : d <= 14 ? BR_CONFIG.MESSAGES.renewal_14 : BR_CONFIG.MESSAGES.renewal_30, { ...c, product: p.product, insurer: p.insurer });
+    return `<div class="ren-i ${cls}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+        <div>
+          <div style="font-size:15px;font-weight:700;color:var(--navy);">${c ? c.name : 'Unknown'}</div>
+          <div style="font-size:13px;color:var(--ink3);">${p.insurer||''} · ${p.product||''}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div style="font-size:13px;font-weight:700;color:${d<=7?'var(--red)':d<=14?'var(--amber)':'var(--sage)'};">${d} days</div>
+          <div style="font-size:11px;color:var(--ink3);">AED ${Number(p.premium||0).toLocaleString()}</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--green);margin-bottom:8px;">Commission: AED ${comm.toLocaleString()}</div>
+      <div style="display:flex;gap:8px;">
+        ${c && c.phone ? `<a href="${U.callLink(c.phone)}" class="act-btn act-call btn-sm">📞 Call</a>` : ''}
+        ${c && c.phone ? `<a href="${U.waLink(c.phone,waMsg)}" target="_blank" class="act-btn act-wa btn-sm">💬 Renewal WA</a>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderHora() {
+  const h   = getHora();
+  const now = new Date();
+  const el  = document.getElementById('dHora');
+
+  const isPowerDay = h.isPowerDay;
+  const powerBanner = isPowerDay ? `<div style="background:linear-gradient(135deg,#C9893A,#E8B86A);color:white;border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:13px;font-weight:700;">⭐ ${h.dayQuality.label} — ${h.dayQuality.tip}</div>` : '';
+
+  const isAbhijit = now.getHours() === 12 || (now.getHours() === 12 && now.getMinutes() < 48);
+  const abhijitBanner = isAbhijit ? `<div style="background:linear-gradient(135deg,#1B3A5C,#2A5A8C);color:white;border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:13px;font-weight:700;">✨ ABHIJIT MUHURTA — Most Auspicious Window · Make your most important call NOW</div>` : '';
+
+  const mitigation = h.mitigation ? `<div style="background:#FFF4E6;border-radius:8px;padding:10px 12px;margin-top:8px;font-size:12px;color:var(--amber);line-height:1.6;"><strong>Strategy for this hora:</strong> ${h.mitigation}</div>` : '';
+
+  el.innerHTML = `
+    ${powerBanner}
+    ${abhijitBanner}
+    <div class="hora-now" style="background:${h.current.color};">
+      <div style="font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Now · Updates every hour</div>
+      <div style="font-size:22px;font-weight:700;color:var(--navy);">${h.current.icon} ${h.current.name} Hora · ${h.current.label}</div>
+      <div style="font-size:13px;color:var(--ink2);margin-top:4px;">${h.current.desc}</div>
+      ${mitigation}
+    </div>
+    <div style="background:${h.next.color};border-radius:10px;padding:12px 14px;border:1px solid rgba(0,0,0,0.06);">
+      <div style="font-size:11px;color:var(--ink3);margin-bottom:3px;">Coming next</div>
+      <div style="font-size:15px;font-weight:700;color:var(--navy);">${h.next.icon} ${h.next.name} — ${h.next.label}</div>
+      <div style="font-size:12px;color:var(--ink3);margin-top:2px;">${h.next.desc}</div>
+    </div>
+    <div style="margin-top:10px;text-align:right;">
+      <button onclick="showFullHora()" class="btn btn-o btn-sm">View full day schedule</button>
+    </div>`;
+}
+
+function showFullHora() {
+  const h   = getHora();
+  const now = new Date().getHours();
+  const rows = h.schedule.filter(s => s.hour >= 8 && s.hour <= 23).map(s => {
+    const isCur = s.hour === now;
+    const t = `${s.hour}:00`;
+    return `<div class="hora-row ${isCur ? 'current' : ''}" style="background:${s.info.color};">
+      <div class="hora-icon">${s.info.icon}</div>
+      <div>
+        <div class="hora-label">${s.hora} · ${s.info.label}</div>
+        <div class="hora-desc">${s.info.desc}</div>
+      </div>
+      <div class="hora-time">${t}</div>
+    </div>`;
+  }).join('');
+  openMod(`<div style="font-family:'Playfair Display',serif;font-size:20px;color:var(--navy);margin-bottom:4px;">Today's Hora Schedule</div>
+    <div style="font-size:13px;color:var(--ink3);margin-bottom:16px;">${h.dayQuality.label} · ${h.dayQuality.tip}</div>
+    ${rows}`);
+}
+
+function renderWeekScore() {
+  const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - weekStart.getDay()); weekStart.setHours(0,0,0,0);
+  const weekLogs  = logs.filter(l => new Date(l.date) >= weekStart);
+
+  const contactSet = new Set(weekLogs.filter(l => l.contactId).map(l => l.contactId));
+  const meetings   = weekLogs.filter(l => l.channel === 'Meeting').length;
+  const proposals  = weekLogs.filter(l => l.tags && l.tags.includes('Proposal Discussed')).length;
+  const closings   = contacts.filter(c => { const d = new Date(c.dateAdded||0); return d >= weekStart && c.status === 'client'; }).length;
+  const referrals  = weekLogs.filter(l => l.tags && l.tags.includes('Referred Someone')).length;
+
+  const T = BR_CONFIG.TARGETS;
+  const scores = [
+    { label:'Contacts',  val: contactSet.size, target: T.contacts  },
+    { label:'Meetings',  val: meetings,         target: T.meetings  },
+    { label:'Proposals', val: proposals,        target: T.proposals },
+    { label:'Closings',  val: closings,         target: T.closings  },
+    { label:'Referrals', val: referrals,        target: T.referrals }
+  ];
+
+  document.getElementById('wkGrid').innerHTML = scores.map(s => {
+    const pct = Math.min(100, Math.round(s.val / s.target * 100));
+    const col = pct >= 100 ? 'var(--green)' : pct >= 60 ? 'var(--amber)' : 'var(--rose)';
+    return `<div class="wk-c">
+      <div class="wk-v" style="color:${col};">${s.val}</div>
+      <div class="wk-bar"><div class="wk-fill" style="width:${pct}%;background:${col};"></div></div>
+      <div class="wk-t">${s.label}<br>${s.val}/${s.target}</div>
+    </div>`;
+  }).join('');
+
+  // Insight
+  const totalScore = scores.reduce((sum,s) => sum + Math.min(1, s.val/s.target), 0);
+  const pctOverall = Math.round(totalScore / scores.length * 100);
+  const gaps = scores.filter(s => s.val < s.target).map(s => `${s.target - s.val} more ${s.label.toLowerCase()}`);
+  document.getElementById('wkInsight').textContent = pctOverall >= 100 ? '🎉 Targets hit this week!' :
+    gaps.length ? `Need: ${gaps.slice(0,2).join(' · ')}` : '';
+}
+
+function renderCommission() {
+  DB.getAll('policies').then(pols => {
+    const now = new Date();
+    const thisMonth = pols.filter(p => {
+      const d = U.daysTo(p.renewal);
+      return d !== null && d >= 0 && d <= 30;
+    }).reduce((s,p) => s + Math.round((p.premium||0) * (p.commissionPct || BR_CONFIG.COMMISSION.life_renewal) / 100), 0);
+    const nextMonth = pols.filter(p => {
+      const d = U.daysTo(p.renewal);
+      return d !== null && d > 30 && d <= 60;
+    }).reduce((s,p) => s + Math.round((p.premium||0) * (p.commissionPct || BR_CONFIG.COMMISSION.life_renewal) / 100), 0);
+    const bookVal = pols.filter(p => p.status === 'active').reduce((s,p) => s + (parseFloat(p.premium)||0), 0);
+    document.getElementById('cmMonth').textContent = 'AED ' + thisMonth.toLocaleString();
+    document.getElementById('cmNext').textContent  = 'AED ' + nextMonth.toLocaleString();
+    document.getElementById('cmBook').textContent  = 'AED ' + Math.round(bookVal).toLocaleString();
+    document.getElementById('cmTrail').textContent = 'AED 0';
+  });
+}
+
+function openMod(html) {
+  document.getElementById('mBody').innerHTML = html;
+  document.getElementById('mOv').classList.add('open');
+}
+function closeMod() { document.getElementById('mOv').classList.remove('open'); }
+document.getElementById('mOv').addEventListener('click', e => { if (e.target === document.getElementById('mOv')) closeMod(); });
+
+function toast(msg, dur=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+
+init();
+</script>
+</body>
+</html>
