@@ -7,15 +7,15 @@ const BR_CONFIG = {
 
   // ── YOUR GOOGLE SHEET ID ──────────────────────────────────
   // Found in your Google Sheet URL between /d/ and /edit
-  SHEET_ID: 'YOUR_GOOGLE_SHEET_ID_HERE',
+  SHEET_ID: '1g59Rq4tz9ochU5_9qQNfGhOJ13XUaLqSLzPLFyVz7mo',
 
   // ── YOUR GOOGLE OAUTH CLIENT ID ──────────────────────────
   // From Google Cloud Console → Credentials
-  CLIENT_ID: 'YOUR_GOOGLE_CLIENT_ID_HERE',
+  CLIENT_ID: 'http://973273003983-3uki430667q7ujjqts70b051q48fbude.apps.googleusercontent.com',
 
   // ── YOUR PIN (4 digits) ───────────────────────────────────
   // Used for offline access without Google sign-in
-  PIN: '1971',
+  PIN: '9671',
 
   // ── YOUR DETAILS ──────────────────────────────────────────
   NAME: 'Babu Raj',
