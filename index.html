@@ -8,25 +8,37 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 body{font-family:'Inter',sans-serif;background:#0C1E35;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;-webkit-font-smoothing:antialiased;}
-.brand{text-align:center;margin-bottom:40px;}
-.brand-logo{font-family:'Playfair Display',serif;font-size:40px;font-weight:700;color:#E8B86A;letter-spacing:-0.5px;}
+.brand{text-align:center;margin-bottom:36px;}
+.brand-logo{font-family:'Playfair Display',serif;font-size:40px;font-weight:700;color:#E8B86A;}
 .brand-sub{font-size:12px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-top:8px;}
 .card{background:#142438;border:1px solid rgba(232,184,106,0.2);border-radius:22px;padding:34px 28px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.4);}
-.card-title{font-size:18px;font-weight:800;color:white;margin-bottom:6px;letter-spacing:-0.2px;}
-.card-sub{font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:32px;line-height:1.6;}
-.pin-display{display:flex;gap:16px;justify-content:center;margin-bottom:34px;}
+.card-title{font-size:18px;font-weight:800;color:white;margin-bottom:6px;}
+.card-sub{font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:28px;line-height:1.6;}
+/* PIN dots */
+.pin-display{display:flex;gap:16px;justify-content:center;margin-bottom:30px;}
 .pin-dot{width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,0.15);background:transparent;transition:all 0.15s;}
 .pin-dot.filled{background:#E8B86A;border-color:#E8B86A;box-shadow:0 0 10px rgba(232,184,106,0.5);}
+/* Numpad */
 .numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
 .num{padding:20px;border-radius:14px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.08);color:white;font-size:22px;font-weight:700;cursor:pointer;text-align:center;transition:all 0.1s;font-family:'Inter',sans-serif;user-select:none;}
 .num:active{background:rgba(232,184,106,0.25);border-color:rgba(232,184,106,0.5);transform:scale(0.94);}
 .num.ctrl{font-size:12px;font-weight:800;color:rgba(255,255,255,0.35);letter-spacing:0.05em;}
+/* Messages */
 .msg{min-height:22px;text-align:center;margin-top:16px;font-size:13px;font-weight:700;letter-spacing:0.02em;color:rgba(255,255,255,0.3);}
 .msg.bad{color:#FF6B6B;}
+/* Welcome back screen */
+.welcome-card{background:#142438;border:1px solid rgba(232,184,106,0.2);border-radius:22px;padding:34px 28px;width:100%;max-width:360px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.4);}
+.welcome-icon{font-size:48px;margin-bottom:16px;}
+.welcome-name{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:#E8B86A;margin-bottom:8px;}
+.welcome-sub{font-size:14px;color:rgba(255,255,255,0.5);margin-bottom:28px;line-height:1.6;}
+.welcome-btn{width:100%;padding:16px;border-radius:14px;background:#E8B86A;color:#0C1E35;border:none;font-family:'Inter',sans-serif;font-size:16px;font-weight:800;cursor:pointer;margin-bottom:12px;letter-spacing:0.01em;}
+.welcome-btn:active{opacity:0.85;transform:scale(0.98);}
+.other-btn{width:100%;padding:12px;border-radius:14px;background:transparent;color:rgba(255,255,255,0.4);border:1px solid rgba(255,255,255,0.1);font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;}
+/* Loader */
 .loading{display:none;text-align:center;padding:40px 20px;}
 .spinner{width:38px;height:38px;border:3px solid rgba(255,255,255,0.08);border-top-color:#E8B86A;border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 16px;}
 @keyframes spin{to{transform:rotate(360deg);}}
-.ver{font-size:11px;color:rgba(255,255,255,0.12);text-align:center;margin-top:28px;font-weight:600;letter-spacing:0.06em;}
+.ver{font-size:11px;color:rgba(255,255,255,0.12);text-align:center;margin-top:24px;font-weight:600;letter-spacing:0.06em;}
 </style>
 </head>
 <body>
@@ -36,7 +48,17 @@ body{font-family:'Inter',sans-serif;background:#0C1E35;min-height:100vh;display:
   <div class="brand-sub">Advisory System · Babu Raj</div>
 </div>
 
-<div class="card" id="card">
+<!-- WELCOME BACK (shown if valid session exists) -->
+<div class="welcome-card" id="welcomeCard" style="display:none;">
+  <div class="welcome-icon">✦</div>
+  <div class="welcome-name" id="welcomeName">Welcome back</div>
+  <div class="welcome-sub">Your session is still active.<br>Tap to continue where you left off.</div>
+  <button class="welcome-btn" onclick="launch()">Continue →</button>
+  <button class="other-btn" onclick="showPin()">Enter PIN instead</button>
+</div>
+
+<!-- PIN SCREEN (always available, shown on first visit or by choice) -->
+<div class="card" id="pinCard">
   <div class="card-title">Enter Your PIN</div>
   <div class="card-sub">4-digit PIN to access your system</div>
   <div class="pin-display">
@@ -62,6 +84,7 @@ body{font-family:'Inter',sans-serif;background:#0C1E35;min-height:100vh;display:
   <div class="msg" id="msg">Enter your PIN</div>
 </div>
 
+<!-- LOADING -->
 <div class="loading" id="loadDiv">
   <div class="spinner"></div>
   <div style="font-size:14px;color:rgba(255,255,255,0.5);font-weight:600;">Opening your system...</div>
@@ -69,96 +92,86 @@ body{font-family:'Inter',sans-serif;background:#0C1E35;min-height:100vh;display:
 
 <div class="ver" id="ver"></div>
 
-<!-- ══════════════════════════════════════════════════════
-     STEP 1: Load config.js as a direct synchronous script.
-     The browser MUST finish loading this before it runs
-     any code below. This is guaranteed by HTML spec —
-     synchronous script tags block execution until loaded.
-     ══════════════════════════════════════════════════ -->
+<!-- config.js loads synchronously — BR_CONFIG guaranteed before PIN logic -->
 <script src="config.js"></script>
 
-<!-- ══════════════════════════════════════════════════════
-     STEP 2: All PIN logic runs AFTER config.js is loaded.
-     BR_CONFIG is guaranteed to exist here.
-     ══════════════════════════════════════════════════ -->
 <script>
 
-// Show version from config
-if (window.BR_CONFIG && BR_CONFIG.VERSION) {
-  document.getElementById('ver').textContent = 'v' + BR_CONFIG.VERSION;
+// Show version
+if (window.BR_CONFIG) {
+  document.getElementById('ver').textContent = 'v' + (BR_CONFIG.VERSION || '1.0');
 }
 
-// Check for valid existing session (within 8 hours)
+// Check existing session
 var lastLogin = parseInt(localStorage.getItem('br_login_time') || '0');
-var sessionAge = Date.now() - lastLogin;
-if (localStorage.getItem('br_auth') === 'ok' && sessionAge < 8 * 60 * 60 * 1000) {
-  launch();
+var sessionOk = localStorage.getItem('br_auth') === 'ok' && (Date.now() - lastLogin) < 8 * 60 * 60 * 1000;
+
+if (sessionOk) {
+  // Valid session — show welcome back screen
+  document.getElementById('pinCard').style.display     = 'none';
+  document.getElementById('welcomeCard').style.display = 'block';
+  if (window.BR_CONFIG) {
+    document.getElementById('welcomeName').textContent = 'Welcome back, ' + BR_CONFIG.NAME.split(' ')[0];
+  }
+} else {
+  // No session — show PIN screen
+  document.getElementById('pinCard').style.display     = 'block';
+  document.getElementById('welcomeCard').style.display = 'none';
+}
+
+function showPin() {
+  document.getElementById('welcomeCard').style.display = 'none';
+  document.getElementById('pinCard').style.display     = 'block';
 }
 
 var pin = '';
 
 function k(key) {
-  if (key === 'C')         { pin = ''; }
-  else if (key === 'DEL')  { pin = pin.slice(0, -1); }
-  else if (pin.length < 4) { pin += key; }
+  if (key === 'C')        { pin = ''; }
+  else if (key === 'DEL') { pin = pin.slice(0, -1); }
+  else if (pin.length < 4){ pin += key; }
 
-  // Update dots
   for (var i = 0; i < 4; i++) {
     document.getElementById('d' + i).classList.toggle('filled', i < pin.length);
   }
-
-  // Clear error message while typing
   document.getElementById('msg').textContent = 'Enter your PIN';
-  document.getElementById('msg').className = 'msg';
+  document.getElementById('msg').className   = 'msg';
 
-  // Check PIN when 4 digits entered
-  if (pin.length === 4) {
-    setTimeout(check, 80);
-  }
+  if (pin.length === 4) setTimeout(check, 80);
 }
 
 function check() {
-  // BR_CONFIG is always available here because
-  // config.js loaded synchronously above
-  var correct = String(BR_CONFIG.PIN);
-  var entered  = String(pin);
-
-  if (entered === correct) {
+  if (String(pin) === String(BR_CONFIG.PIN)) {
     localStorage.setItem('br_auth', 'ok');
     localStorage.setItem('br_login_time', String(Date.now()));
     launch();
   } else {
     document.getElementById('msg').textContent = 'Incorrect PIN — try again';
-    document.getElementById('msg').className = 'msg bad';
+    document.getElementById('msg').className   = 'msg bad';
     shake();
     pin = '';
-    for (var i = 0; i < 4; i++) {
-      document.getElementById('d' + i).classList.remove('filled');
-    }
+    for (var i = 0; i < 4; i++) document.getElementById('d' + i).classList.remove('filled');
   }
 }
 
 function shake() {
-  var card = document.getElementById('card');
+  var card  = document.getElementById('pinCard');
   var moves = [10, -10, 8, -8, 5, -5, 0];
   var i = 0;
   var t = setInterval(function() {
     card.style.transform = 'translateX(' + moves[i] + 'px)';
     i++;
-    if (i >= moves.length) {
-      clearInterval(t);
-      card.style.transform = '';
-    }
+    if (i >= moves.length) { clearInterval(t); card.style.transform = ''; }
   }, 45);
 }
 
 function launch() {
-  document.getElementById('card').style.display = 'none';
-  document.querySelector('.brand').style.display = 'none';
+  document.getElementById('pinCard').style.display     = 'none';
+  document.getElementById('welcomeCard').style.display = 'none';
+  document.querySelector('.brand').style.opacity = '0';
+  document.querySelector('.brand').style.transition = 'opacity 0.3s';
   document.getElementById('loadDiv').style.display = 'block';
-  setTimeout(function() {
-    window.location.href = 'today.html';
-  }, 600);
+  setTimeout(function() { window.location.href = 'today.html'; }, 600);
 }
 
 </script>

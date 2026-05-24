@@ -1,12 +1,9 @@
-// ═══════════════════════════════════════════════════
 // BR BUSINESS — SESSION + LOGOUT MANAGER
-// Loaded on every page except index.html
-// config.js must be loaded BEFORE this file
-// ═══════════════════════════════════════════════════
+// Loaded on every page after index.html
 
 (function() {
 
-  // ── SESSION CHECK ────────────────────────────────
+  // Session check
   var auth      = localStorage.getItem('br_auth');
   var lastLogin = parseInt(localStorage.getItem('br_login_time') || '0');
   var age       = Date.now() - lastLogin;
@@ -19,30 +16,24 @@
     return;
   }
 
-  // ── ADD LOGOUT BUTTON ────────────────────────────
-  function addLogout() {
-    // Don't add if already exists
+  // Add logout button — always visible top right
+  function addBtn() {
     if (document.getElementById('logoutBtn')) return;
-
-    var btn = document.createElement('button');
-    btn.id  = 'logoutBtn';
-    btn.textContent = 'Logout';
-
-    var styles = [
-      'position:fixed', 'top:14px', 'right:14px',
-      'background:rgba(255,255,255,0.08)',
-      'border:1px solid rgba(255,255,255,0.18)',
+    var b = document.createElement('button');
+    b.id  = 'logoutBtn';
+    b.innerHTML = 'Logout';
+    b.style.cssText = [
+      'position:fixed', 'top:12px', 'right:12px',
+      'background:#1A3A5C', 'color:rgba(255,255,255,0.7)',
+      'border:1px solid rgba(255,255,255,0.2)',
       'border-radius:20px', 'padding:6px 14px',
-      'color:rgba(255,255,255,0.55)',
       'font-size:11px', 'font-weight:800',
-      'cursor:pointer', 'z-index:999',
+      'cursor:pointer', 'z-index:9999',
       'font-family:Inter,sans-serif',
-      'letter-spacing:0.07em',
-      'text-transform:uppercase'
-    ];
-    btn.style.cssText = styles.join(';');
-
-    btn.addEventListener('click', function() {
+      'letter-spacing:0.07em', 'text-transform:uppercase',
+      'box-shadow:0 2px 8px rgba(0,0,0,0.2)'
+    ].join(';');
+    b.addEventListener('click', function() {
       if (confirm('Log out of BR Business?')) {
         localStorage.removeItem('br_auth');
         localStorage.removeItem('br_login_time');
@@ -50,15 +41,13 @@
         window.location.href = 'index.html';
       }
     });
-
-    document.body.appendChild(btn);
+    document.body.appendChild(b);
   }
 
-  // Add button when DOM is ready
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', addLogout);
+    document.addEventListener('DOMContentLoaded', addBtn);
   } else {
-    addLogout();
+    addBtn();
   }
 
 })();
