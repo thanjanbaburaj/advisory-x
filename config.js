@@ -15,7 +15,7 @@ const BR_CONFIG = {
 
   // ── YOUR PIN (4 digits) ───────────────────────────────────
   // Used for offline access without Google sign-in
-  PIN: '9671',
+  PIN: '1234',
 
   // ── YOUR DETAILS ──────────────────────────────────────────
   NAME: 'Babu Raj',
