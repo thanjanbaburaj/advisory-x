@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>BR Business · Policies</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.pol-card{background:white;border-radius:16px;border:1.5px solid var(--border);padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.04);}
+.pol-insurer{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink3);margin-bottom:4px;}
+.pol-client{font-size:18px;font-weight:800;color:var(--navy);}
+.pol-product{font-size:13px;color:var(--ink3);font-weight:600;margin-top:2px;}
+.renew-urgent{border-left:4px solid var(--red);}
+.renew-soon{border-left:4px solid var(--amber);}
+.renew-ok{border-left:4px solid var(--green);}
+.comm-stat{background:var(--off);border-radius:12px;padding:14px;text-align:center;border:1px solid var(--border);}
+.comm-val{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--gold);}
+.comm-lbl{font-size:11px;color:var(--ink3);font-weight:700;margin-top:4px;text-transform:uppercase;letter-spacing:0.05em;}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+<div class="modal-ov" id="mOv">
+  <div class="modal"><div class="modal-handle"></div><div id="mBody"></div></div>
+</div>
+
+<div class="page">
+
+<div class="tabs">
+  <div class="tab active" onclick="swTab('renewals',this)">🔔 Renewals</div>
+  <div class="tab" onclick="swTab('all',this)">📋 All Policies</div>
+  <div class="tab" onclick="swTab('add',this)">➕ Add Policy</div>
+  <div class="tab" onclick="swTab('commission',this)">💰 Commission</div>
+</div>
+
+<!-- RENEWALS TAB -->
+<div class="panel active" id="tab-renewals">
+  <div class="stats4" id="renStats">
+    <div class="comm-stat"><div class="comm-val" id="rn-urgent">0</div><div class="comm-lbl">Under 30 days</div></div>
+    <div class="comm-stat"><div class="comm-val" id="rn-soon">0</div><div class="comm-lbl">30–60 days</div></div>
+    <div class="comm-stat"><div class="comm-val" id="rn-ok">0</div><div class="comm-lbl">60–90 days</div></div>
+    <div class="comm-stat"><div class="comm-val" id="rn-total">0</div><div class="comm-lbl">Total Active</div></div>
+  </div>
+  <div id="renewalList"></div>
+</div>
+
+<!-- ALL POLICIES TAB -->
+<div class="panel" id="tab-all">
+  <div class="search-w">
+    <span class="search-ic">🔍</span>
+    <input class="search-i" id="polSearch" placeholder="Search client or insurer..." oninput="renderAll()">
+  </div>
+  <div style="font-size:12px;color:var(--ink3);margin-bottom:10px;font-weight:600;" id="polCount"></div>
+  <div id="allPolicies"></div>
+</div>
+
+<!-- ADD POLICY TAB -->
+<div class="panel" id="tab-add">
+  <div class="card">
+    <div class="card-t">Add Policy</div>
+
+    <div class="fg">
+      <label class="fl">Client *</label>
+      <div style="position:relative;">
+        <input class="fi" id="ap-client" placeholder="Search client..." oninput="searchAddClient()" autocomplete="off">
+        <div id="ap-clientResults" style="display:none;position:absolute;left:0;right:0;background:white;border:1.5px solid var(--border);border-top:none;border-radius:0 0 12px 12px;max-height:180px;overflow-y:auto;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,0.1);"></div>
+      </div>
+      <input type="hidden" id="ap-clientId">
+    </div>
+
+    <div class="fr2">
+      <div class="fg">
+        <label class="fl">Insurer *</label>
+        <select class="fs" id="ap-insurer">
+          <option value="">Select...</option>
+          <optgroup label="Life &amp; Investment">
+            <option>Zurich International</option><option>Friends Provident / Evelyn</option>
+            <option>Generali Worldwide</option><option>RL360</option>
+            <option>Investors Trust</option><option>MetLife International</option>
+            <option>LIC International</option><option>SunLife</option>
+            <option>Old Mutual International</option><option>Standard Life</option>
+            <option>AXA</option><option>HDFC International</option>
+          </optgroup>
+          <optgroup label="Group Medical">
+            <option>Daman</option><option>Sukoon</option><option>QIC</option>
+            <option>Neuron</option><option>ADNIC</option><option>NextCare</option>
+          </optgroup>
+          <optgroup label="Takaful">
+            <option>Takaful Emarat</option><option>Al Hilal Takaful</option><option>Noor Takaful</option>
+          </optgroup>
+          <optgroup label="General">
+            <option>Jumbo</option><option>RSA</option><option>Oman Insurance</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="fg">
+        <label class="fl">Product Type *</label>
+        <select class="fs" id="ap-type">
+          <option value="">Select...</option>
+          <option>Term Life</option><option>Whole Life</option>
+          <option>Critical Illness</option><option>Investment Linked</option>
+          <option>Savings / Endowment</option><option>Group Medical</option>
+          <option>Group Life</option><option>Takaful Life</option>
+          <option>Takaful Medical</option><option>Employer Liability</option>
+          <option>General Insurance</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="fg"><label class="fl">Policy Number</label><input class="fi" id="ap-polnum" placeholder="Policy / Certificate number"></div>
+
+    <div class="fr2">
+      <div class="fg"><label class="fl">Annual Premium (AED) *</label><input type="number" class="fi" id="ap-premium" placeholder="0" oninput="calcComm()"></div>
+      <div class="fg"><label class="fl">Your Commission %</label><input type="number" class="fi" id="ap-commPct" placeholder="10" oninput="calcComm()"></div>
+    </div>
+
+    <div class="fg" style="background:var(--green2);border-radius:10px;padding:12px 14px;border:1px solid #A0D4B0;">
+      <div style="font-size:12px;font-weight:800;color:var(--green);text-transform:uppercase;letter-spacing:0.06em;">Your Commission</div>
+      <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--green);" id="ap-commAED">AED 0</div>
+    </div>
+
+    <div class="fr2">
+      <div class="fg"><label class="fl">Sum Assured (AED)</label><input type="number" class="fi" id="ap-sum" placeholder="0"></div>
+      <div class="fg">
+        <label class="fl">Payment Frequency</label>
+        <select class="fs" id="ap-freq">
+          <option>Annual</option><option>Semi-Annual</option>
+          <option>Quarterly</option><option>Monthly</option>
+          <option>Single Premium</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="fr2">
+      <div class="fg"><label class="fl">Start Date *</label><input type="date" class="fi" id="ap-start" oninput="autoRenewal()"></div>
+      <div class="fg"><label class="fl">Renewal / End Date *</label><input type="date" class="fi" id="ap-renewal"></div>
+    </div>
+
+    <div class="fg"><label class="fl">Beneficiary</label><input class="fi" id="ap-bene" placeholder="Beneficiary name(s)"></div>
+    <div class="fg"><label class="fl">Notes</label><textarea class="ft" id="ap-notes" placeholder="Any special conditions or notes..." style="min-height:60px;"></textarea></div>
+
+    <button class="btn btn-p btn-full" onclick="savePolicy()" style="margin-top:4px;">Save Policy</button>
+  </div>
+</div>
+
+<!-- COMMISSION TAB -->
+<div class="panel" id="tab-commission">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;" id="commGrid"></div>
+  <div class="st">Commission by Insurer</div>
+  <div id="commByInsurer"></div>
+  <div class="st">Book of Business</div>
+  <div class="card" id="bookCard"></div>
+  <button class="btn btn-o btn-full" onclick="exportBook()">📄 Export Book of Business</button>
+</div>
+
+</div>
+
+<nav class="nav">
+  <button class="nb" onclick="location.href='today.html'"><span class="ni">🏠</span>Today</button>
+  <button class="nb" onclick="location.href='crm.html'"><span class="ni">👥</span>CRM</button>
+  <button class="nb active"><span class="ni">📋</span>Policies</button>
+  <button class="nb" onclick="location.href='calculators.html'"><span class="ni">🧮</span>Calculate</button>
+  <button class="nb" onclick="comingSoon('Leads')"><span class="ni">🎯</span>Leads</button>
+</nav>
+
+<script src="config.js"></script>
+<script src="sheets.js"></script>
+<script src="logout.js"></script>
+<script>
+
+var policies = [], contacts = [], addClientId = null;
+
+async function init() {
+  await DB.open(); GS.init();
+  policies = await DB.getAll('policies');
+  contacts = await DB.getAll('contacts');
+  renderRenewals();
+  renderCommission();
+}
+
+function comingSoon(n) { toast('📦 ' + n + ' — coming soon'); }
+
+function swTab(id, el) {
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  document.getElementById('tab-'+id).classList.add('active'); el.classList.add('active');
+  if (id==='renewals') renderRenewals();
+  if (id==='all')      renderAll();
+  if (id==='commission') renderCommission();
+}
+
+// ── CLIENT SEARCH FOR ADD ─────────────────────────
+function searchAddClient() {
+  var q   = document.getElementById('ap-client').value.toLowerCase().trim();
+  var res = document.getElementById('ap-clientResults');
+  if (q.length < 1) { res.style.display='none'; return; }
+  var m = contacts.filter(function(c){return c.name.toLowerCase().indexOf(q)>-1||(c.company||'').toLowerCase().indexOf(q)>-1;}).slice(0,8);
+  if (!m.length) { res.style.display='none'; return; }
+  res.style.display='block';
+  res.innerHTML=m.map(function(c){
+    return '<div onclick="selectAddClient(\''+c.id+'\',\''+c.name.replace(/'/g,"\\'")+'\',\''+c.company+'\')" style="padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--border);font-size:14px;font-weight:600;" onmouseover="this.style.background=\'var(--off)\'" onmouseout="this.style.background=\'\'">'+c.name+'<span style="color:var(--ink3);font-size:12px;font-weight:400;margin-left:8px;">'+(c.company||'')+'</span></div>';
+  }).join('');
+}
+
+function selectAddClient(id, name, company) {
+  addClientId = id;
+  document.getElementById('ap-client').value = name + (company ? ' · ' + company : '');
+  document.getElementById('ap-clientId').value = id;
+  document.getElementById('ap-clientResults').style.display='none';
+}
+
+function calcComm() {
+  var prem = parseFloat(document.getElementById('ap-premium').value)||0;
+  var pct  = parseFloat(document.getElementById('ap-commPct').value)||0;
+  var comm = Math.round(prem * pct / 100);
+  document.getElementById('ap-commAED').textContent = 'AED ' + comm.toLocaleString();
+}
+
+function autoRenewal() {
+  var start = document.getElementById('ap-start').value;
+  if (!start) return;
+  var d = new Date(start);
+  d.setFullYear(d.getFullYear() + 1);
+  document.getElementById('ap-renewal').value = d.toISOString().split('T')[0];
+}
+
+// ── SAVE POLICY ───────────────────────────────────
+async function savePolicy() {
+  var clientId = document.getElementById('ap-clientId').value;
+  var insurer  = document.getElementById('ap-insurer').value;
+  var type     = document.getElementById('ap-type').value;
+  var premium  = parseFloat(document.getElementById('ap-premium').value)||0;
+  var renewal  = document.getElementById('ap-renewal').value;
+  if (!clientId) { toast('Please select a client'); return; }
+  if (!insurer)  { toast('Please select an insurer'); return; }
+  if (!type)     { toast('Please select a product type'); return; }
+  if (!premium)  { toast('Please enter the annual premium'); return; }
+  if (!renewal)  { toast('Please enter the renewal date'); return; }
+
+  var commPct = parseFloat(document.getElementById('ap-commPct').value)||0;
+  var c = contacts.find(function(x){return x.id===clientId;})||{};
+  var pol = {
+    id:U.id(), contactId:clientId, clientName:c.name||'Unknown',
+    insurer:insurer, product:type,
+    policyNum:document.getElementById('ap-polnum').value,
+    premium:premium, commissionPct:commPct,
+    commissionAED:Math.round(premium*commPct/100),
+    sumAssured:parseFloat(document.getElementById('ap-sum').value)||0,
+    frequency:document.getElementById('ap-freq').value,
+    start:document.getElementById('ap-start').value,
+    renewal:renewal,
+    beneficiary:document.getElementById('ap-bene').value,
+    notes:document.getElementById('ap-notes').value,
+    status:'active', created:new Date().toISOString()
+  };
+  await DB.put('policies', pol);
+  GS.addToQueue('append', SHEETS.policies, [pol.id,pol.contactId,pol.clientName,pol.insurer,pol.product,pol.policyNum,pol.sumAssured,pol.premium,pol.commissionPct,pol.commissionAED,pol.frequency,pol.start,pol.renewal,U.daysTo(pol.renewal),'',pol.status,pol.beneficiary,pol.notes,'']);
+  policies = await DB.getAll('policies');
+  // Reset form
+  ['ap-client','ap-polnum','ap-premium','ap-commPct','ap-sum','ap-start','ap-renewal','ap-bene','ap-notes'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('ap-clientId').value='';
+  document.getElementById('ap-commAED').textContent='AED 0';
+  addClientId=null;
+  toast('✅ Policy saved! Commission: AED ' + pol.commissionAED.toLocaleString());
+  swTab('renewals', document.querySelectorAll('.tab')[0]);
+}
+
+// ── RENDER RENEWALS ───────────────────────────────
+function renderRenewals() {
+  var active = policies.filter(function(p){return p.status==='active';});
+  var urgent = active.filter(function(p){var d=U.daysTo(p.renewal);return d!==null&&d>=0&&d<=30;});
+  var soon   = active.filter(function(p){var d=U.daysTo(p.renewal);return d!==null&&d>30&&d<=60;});
+  var ok     = active.filter(function(p){var d=U.daysTo(p.renewal);return d!==null&&d>60&&d<=90;});
+  document.getElementById('rn-urgent').textContent = urgent.length;
+  document.getElementById('rn-soon').textContent   = soon.length;
+  document.getElementById('rn-ok').textContent     = ok.length;
+  document.getElementById('rn-total').textContent  = active.length;
+
+  var all90 = active.filter(function(p){var d=U.daysTo(p.renewal);return d!==null&&d>=0&&d<=90;}).sort(function(a,b){return U.daysTo(a.renewal)-U.daysTo(b.renewal);});
+  var el = document.getElementById('renewalList');
+
+  if (!all90.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-i">✅</div><div class="empty-t">No renewals due in the next 90 days.<br>Add policies in the Add tab.</div></div>';
+    return;
+  }
+
+  el.innerHTML = all90.map(function(p) {
+    var d    = U.daysTo(p.renewal);
+    var cls  = d<=30?'renew-urgent':d<=60?'renew-soon':'renew-ok';
+    var col  = d<=30?'var(--red)':d<=60?'var(--amber)':'var(--green)';
+    var c    = contacts.find(function(x){return x.id===p.contactId;})||{};
+    var waMsg= U.msg(d<=7?BR_CONFIG.MESSAGES.renewal_7:d<=14?BR_CONFIG.MESSAGES.renewal_14:BR_CONFIG.MESSAGES.renewal_30,{name:c.name||p.clientName,product:p.product,insurer:p.insurer});
+    return '<div class="pol-card '+cls+'">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">' +
+        '<div>' +
+          '<div class="pol-insurer">'+p.insurer+'</div>' +
+          '<div class="pol-client">'+(c.name||p.clientName)+'</div>' +
+          '<div class="pol-product">'+p.product+(p.policyNum?' · '+p.policyNum:'')+'</div>' +
+        '</div>' +
+        '<div style="text-align:right;">' +
+          '<div style="font-size:20px;font-weight:800;color:'+col+';">'+d+'d</div>' +
+          '<div style="font-size:11px;color:var(--ink3);font-weight:600;">'+U.fmt(p.renewal)+'</div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
+        '<div style="font-size:14px;font-weight:700;color:var(--ink2);">AED '+Number(p.premium).toLocaleString()+'/yr</div>' +
+        '<div style="font-size:14px;font-weight:800;color:var(--green);">Comm: AED '+Number(p.commissionAED||0).toLocaleString()+'</div>' +
+      '</div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+        (c.phone?'<a href="'+U.callLink(c.phone)+'" class="act-btn act-call">📞 Call</a>':'') +
+        (c.phone?'<a href="'+U.waLink(c.phone,waMsg)+'" target="_blank" class="act-btn act-wa">💬 Renewal WA</a>':'') +
+        '<button onclick="markRenewed(\''+p.id+'\')" class="act-btn act-log">✅ Mark Renewed</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+async function markRenewed(id) {
+  var p = policies.find(function(x){return x.id===id;});
+  if (!p) return;
+  var d = new Date(p.renewal);
+  d.setFullYear(d.getFullYear()+1);
+  p.renewal = d.toISOString().split('T')[0];
+  await DB.put('policies', p);
+  policies = await DB.getAll('policies');
+  renderRenewals();
+  toast('✅ Renewal recorded. Next renewal: '+U.fmt(p.renewal));
+}
+
+// ── RENDER ALL POLICIES ───────────────────────────
+function renderAll() {
+  var q = (document.getElementById('polSearch')||{value:''}).value.toLowerCase();
+  var filtered = policies.filter(function(p){return !q||(p.clientName||'').toLowerCase().indexOf(q)>-1||(p.insurer||'').toLowerCase().indexOf(q)>-1||(p.product||'').toLowerCase().indexOf(q)>-1;});
+  document.getElementById('polCount').textContent = filtered.length+' polic'+(filtered.length===1?'y':'ies');
+  var el=document.getElementById('allPolicies');
+  if (!filtered.length){el.innerHTML='<div class="empty"><div class="empty-i">📋</div><div class="empty-t">No policies yet.<br>Add your first policy in the Add tab.</div></div>';return;}
+  el.innerHTML=filtered.map(function(p){
+    var d=U.daysTo(p.renewal);
+    var col=d===null?'var(--ink3)':d<=30?'var(--red)':d<=60?'var(--amber)':'var(--green)';
+    var statusBg=p.status==='active'?'var(--green2)':'var(--off)';
+    var statusCol=p.status==='active'?'var(--green)':'var(--ink3)';
+    return '<div class="pol-card">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">' +
+        '<div><div class="pol-insurer">'+p.insurer+'</div><div class="pol-client">'+(p.clientName||'Unknown')+'</div><div class="pol-product">'+p.product+(p.policyNum?' · '+p.policyNum:'')+'</div></div>' +
+        '<span style="background:'+statusBg+';color:'+statusCol+';padding:4px 10px;border-radius:20px;font-size:11px;font-weight:800;text-transform:uppercase;">'+p.status+'</span>' +
+      '</div>' +
+      '<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-top:8px;">' +
+        '<span style="color:var(--ink2);">AED '+Number(p.premium||0).toLocaleString()+'/yr</span>' +
+        '<span style="color:'+col+';">'+(d!==null?d+' days to renewal':U.fmt(p.renewal))+'</span>' +
+        '<span style="color:var(--green);">Comm AED '+Number(p.commissionAED||0).toLocaleString()+'</span>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// ── COMMISSION DASHBOARD ──────────────────────────
+function renderCommission() {
+  var active = policies.filter(function(p){return p.status==='active';});
+  var thisM  = active.filter(function(p){var d=U.daysTo(p.renewal);return d!==null&&d>=0&&d<=30;}).reduce(function(s,p){return s+(p.commissionAED||0);},0);
+  var nextM  = active.filter(function(p){var d=U.daysTo(p.renewal);return d!==null&&d>30&&d<=60;}).reduce(function(s,p){return s+(p.commissionAED||0);},0);
+  var book   = active.reduce(function(s,p){return s+(parseFloat(p.premium)||0);},0);
+  var annualComm = active.reduce(function(s,p){return s+(p.commissionAED||0);},0);
+  var atRisk = active.filter(function(p){var d=U.daysTo(p.renewal);return d!==null&&d<=14&&d>=0;}).reduce(function(s,p){return s+(p.commissionAED||0);},0);
+
+  document.getElementById('commGrid').innerHTML =
+    '<div class="comm-stat"><div class="comm-val">AED '+Math.round(thisM).toLocaleString()+'</div><div class="comm-lbl">Due This Month</div></div>' +
+    '<div class="comm-stat"><div class="comm-val">AED '+Math.round(nextM).toLocaleString()+'</div><div class="comm-lbl">Due Next Month</div></div>' +
+    '<div class="comm-stat"><div class="comm-val">AED '+Math.round(book/1000)+'k</div><div class="comm-lbl">Annual Book</div></div>' +
+    '<div class="comm-stat"><div class="comm-val" style="color:var(--red);">AED '+Math.round(atRisk).toLocaleString()+'</div><div class="comm-lbl">At Risk (14 days)</div></div>';
+
+  // By insurer
+  var byInsurer = {};
+  active.forEach(function(p){
+    var ins=p.insurer||'Unknown';
+    if(!byInsurer[ins]) byInsurer[ins]={premium:0,commission:0,count:0};
+    byInsurer[ins].premium   += parseFloat(p.premium)||0;
+    byInsurer[ins].commission += p.commissionAED||0;
+    byInsurer[ins].count++;
+  });
+  var sorted = Object.keys(byInsurer).sort(function(a,b){return byInsurer[b].premium-byInsurer[a].premium;});
+  document.getElementById('commByInsurer').innerHTML = sorted.map(function(ins){
+    var v=byInsurer[ins];
+    var pct=book>0?Math.round(v.premium/book*100):0;
+    return '<div style="background:white;border-radius:12px;padding:14px;margin-bottom:8px;border:1.5px solid var(--border);">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
+        '<div style="font-size:14px;font-weight:800;color:var(--navy);">'+ins+'</div>' +
+        '<span class="badge b-blue">'+v.count+' polic'+(v.count===1?'y':'ies')+'</span>' +
+      '</div>' +
+      '<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;">' +
+        '<span style="color:var(--ink2);">AED '+Math.round(v.premium).toLocaleString()+'/yr ('+pct+'%)</span>' +
+        '<span style="color:var(--green);">Comm AED '+Math.round(v.commission).toLocaleString()+'</span>' +
+      '</div>' +
+      '<div style="height:5px;background:var(--border);border-radius:3px;margin-top:8px;"><div style="height:100%;width:'+pct+'%;background:var(--navy);border-radius:3px;"></div></div>' +
+    '</div>';
+  }).join('') || '<div style="font-size:13px;color:var(--ink3);padding:10px 0;">Add policies to see commission breakdown.</div>';
+
+  // Book summary
+  document.getElementById('bookCard').innerHTML =
+    '<div style="font-family:Playfair Display,serif;font-size:22px;font-weight:700;color:var(--navy);margin-bottom:16px;">Book of Business Summary</div>' +
+    '<div style="display:flex;flex-direction:column;gap:8px;">' +
+      bookRow('Total Active Policies',   active.length + ' policies') +
+      bookRow('Total Annual Premium',    'AED ' + Math.round(book).toLocaleString()) +
+      bookRow('Annual Commission Est.',  'AED ' + Math.round(annualComm).toLocaleString()) +
+      bookRow('Monthly Average Comm.',   'AED ' + Math.round(annualComm/12).toLocaleString()) +
+      bookRow('Renewals in 30 days',     active.filter(function(p){var d=U.daysTo(p.renewal);return d!==null&&d<=30&&d>=0;}).length + ' policies') +
+    '</div>';
+}
+
+function bookRow(label, value) {
+  return '<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">' +
+    '<div style="font-size:14px;color:var(--ink3);font-weight:600;">'+label+'</div>' +
+    '<div style="font-size:14px;font-weight:800;color:var(--navy);">'+value+'</div>' +
+  '</div>';
+}
+
+function exportBook() {
+  var active = policies.filter(function(p){return p.status==='active';});
+  var book   = active.reduce(function(s,p){return s+(parseFloat(p.premium)||0);},0);
+  var annComm= active.reduce(function(s,p){return s+(p.commissionAED||0);},0);
+  var lines  = ['BABU RAJ — BOOK OF BUSINESS','Generated: '+new Date().toLocaleDateString(),'','SUMMARY','Total Active Policies: '+active.length,'Annual Premium: AED '+Math.round(book).toLocaleString(),'Annual Commission: AED '+Math.round(annComm).toLocaleString(),'','POLICIES'];
+  active.forEach(function(p){lines.push(p.clientName+' | '+p.insurer+' | '+p.product+' | AED '+Number(p.premium||0).toLocaleString()+' | Renews: '+U.fmt(p.renewal));});
+  var blob=new Blob([lines.join('\n')],{type:'text/plain'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='book-of-business-'+U.today()+'.txt';a.click();
+  toast('✅ Book exported');
+}
+
+function openMod(html){document.getElementById('mBody').innerHTML=html;document.getElementById('mOv').classList.add('open');}
+function closeMod(){document.getElementById('mOv').classList.remove('open');}
+document.getElementById('mOv').addEventListener('click',function(e){if(e.target===document.getElementById('mOv'))closeMod();});
+function toast(msg,dur){dur=dur||2500;var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},dur);}
+
+init();
+</script>
+</body>
+</html>

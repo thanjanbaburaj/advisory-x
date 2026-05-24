@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>BR Business · Calculators</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.calc-hero{background:linear-gradient(135deg,#0F2340,#1A3A5C);border-radius:20px;padding:22px 20px;margin-bottom:16px;color:white;}
+.module{background:white;border-radius:16px;border:1.5px solid var(--border);margin-bottom:12px;overflow:hidden;}
+.module-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;cursor:pointer;user-select:none;}
+.module-num{width:32px;height:32px;border-radius:10px;background:var(--navy);color:var(--gold2);font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.module-title{font-size:16px;font-weight:800;color:var(--navy);margin-left:12px;flex:1;}
+.module-status{font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;}
+.module-body{display:none;padding:0 18px 18px;border-top:1.5px solid var(--border);}
+.module-body.open{display:block;}
+.result-box{background:linear-gradient(135deg,#0F2340,#1A3A5C);border-radius:14px;padding:18px;margin-top:16px;color:white;}
+.result-main{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:#E8B86A;line-height:1;}
+.result-label{font-size:12px;opacity:0.65;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;font-weight:700;}
+.result-sub{font-size:13px;opacity:0.75;margin-top:6px;line-height:1.6;}
+.gap-row{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:10px;margin-bottom:6px;border:1px solid var(--border);}
+.gap-label{font-size:14px;font-weight:700;color:var(--navy);}
+.gap-value{font-size:14px;font-weight:800;}
+.gap-positive{color:var(--green);}
+.gap-negative{color:var(--red);}
+.child-block{background:var(--off);border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid var(--border);}
+.summary-card{background:linear-gradient(135deg,#0F2340,#1A3A5C);border-radius:20px;padding:22px;color:white;margin-bottom:12px;}
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.08);}
+.summary-row:last-child{border-bottom:none;}
+.proposal-box{background:linear-gradient(135deg,#1A6B3C,#2E8A52);border-radius:16px;padding:18px;margin-bottom:12px;color:white;}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+<div class="modal-ov" id="mOv">
+  <div class="modal"><div class="modal-handle"></div><div id="mBody"></div></div>
+</div>
+
+<div class="page">
+
+<!-- CLIENT SELECTOR -->
+<div class="st">Client</div>
+<div class="card" style="padding:14px;">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div style="flex:1;position:relative;">
+      <input class="fi" id="clientSearch" placeholder="Search client name..." oninput="searchClient()" autocomplete="off" style="margin-bottom:0;">
+      <div id="clientResults" style="display:none;position:absolute;left:0;right:0;background:white;border:1.5px solid var(--border);border-top:none;border-radius:0 0 12px 12px;max-height:180px;overflow-y:auto;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,0.1);"></div>
+    </div>
+    <button onclick="clearClient()" class="btn btn-o btn-sm">Clear</button>
+  </div>
+  <div id="selectedClient" style="display:none;margin-top:10px;padding:10px 14px;background:var(--off);border-radius:10px;border:1px solid var(--border);">
+    <div style="font-size:15px;font-weight:800;color:var(--navy);" id="scName">—</div>
+    <div style="font-size:12px;color:var(--ink3);font-weight:600;margin-top:2px;" id="scSub">—</div>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="calc-hero">
+  <div style="font-size:11px;opacity:0.6;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;margin-bottom:6px;">Financial Needs Analysis</div>
+  <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:6px;">5-Module FNA Calculator</div>
+  <div style="font-size:13px;opacity:0.75;line-height:1.7;">Complete all modules then tap Generate Summary to produce a personalised proposal. Save it to the client record with one tap.</div>
+</div>
+
+<!-- MODULE 1 — INCOME REPLACEMENT -->
+<div class="module" id="mod1">
+  <div class="module-head" onclick="toggleMod(1)">
+    <div class="module-num">1</div>
+    <div class="module-title">Income Replacement</div>
+    <span class="module-status" id="s1" style="background:var(--off);color:var(--ink3);">Pending</span>
+    <span style="font-size:18px;margin-left:10px;color:var(--ink3);" id="arr1">▼</span>
+  </div>
+  <div class="module-body" id="mb1">
+    <div style="padding-top:16px;">
+      <div class="fr2">
+        <div class="fg"><label class="fl">Monthly Income (AED)</label><input type="number" class="fi" id="m1_income" placeholder="15000" oninput="calc1()"></div>
+        <div class="fg"><label class="fl">Monthly Family Expenses (AED)</label><input type="number" class="fi" id="m1_expenses" placeholder="12000" oninput="calc1()"></div>
+      </div>
+      <div class="fr2">
+        <div class="fg"><label class="fl">Current Age</label><input type="number" class="fi" id="m1_age" placeholder="40" oninput="calc1()"></div>
+        <div class="fg"><label class="fl">Age of Youngest Dependant</label><input type="number" class="fi" id="m1_youngest" placeholder="8" oninput="calc1()"></div>
+      </div>
+      <div class="fr2">
+        <div class="fg"><label class="fl">Existing Life Cover (AED)</label><input type="number" class="fi" id="m1_existing" placeholder="0" oninput="calc1()"></div>
+        <div class="fg"><label class="fl">Existing Savings (AED)</label><input type="number" class="fi" id="m1_savings" placeholder="0" oninput="calc1()"></div>
+      </div>
+      <div class="fg">
+        <label class="fl">Inflation Rate</label>
+        <select class="fs" id="m1_inflation" onchange="calc1()">
+          <option value="3.5">UAE Standard — 3.5%</option>
+          <option value="4">Conservative — 4%</option>
+          <option value="5">Higher — 5%</option>
+        </select>
+      </div>
+      <div id="r1"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODULE 2 — EDUCATION FUND -->
+<div class="module" id="mod2">
+  <div class="module-head" onclick="toggleMod(2)">
+    <div class="module-num">2</div>
+    <div class="module-title">Education Fund</div>
+    <span class="module-status" id="s2" style="background:var(--off);color:var(--ink3);">Pending</span>
+    <span style="font-size:18px;margin-left:10px;color:var(--ink3);" id="arr2">▼</span>
+  </div>
+  <div class="module-body" id="mb2">
+    <div style="padding-top:16px;">
+      <div class="fg">
+        <label class="fl">Number of Children</label>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-sm btn-o" onclick="setChildren(1)">1</button>
+          <button class="btn btn-sm btn-o" onclick="setChildren(2)">2</button>
+          <button class="btn btn-sm btn-o" onclick="setChildren(3)">3</button>
+          <button class="btn btn-sm btn-o" onclick="setChildren(4)">4</button>
+        </div>
+      </div>
+      <div id="childrenForms"></div>
+      <div id="r2"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODULE 3 — EMERGENCY FUND -->
+<div class="module" id="mod3">
+  <div class="module-head" onclick="toggleMod(3)">
+    <div class="module-num">3</div>
+    <div class="module-title">Emergency Fund Gap</div>
+    <span class="module-status" id="s3" style="background:var(--off);color:var(--ink3);">Pending</span>
+    <span style="font-size:18px;margin-left:10px;color:var(--ink3);" id="arr3">▼</span>
+  </div>
+  <div class="module-body" id="mb3">
+    <div style="padding-top:16px;">
+      <div class="fr2">
+        <div class="fg"><label class="fl">Monthly Expenses (AED)</label><input type="number" class="fi" id="m3_exp" placeholder="12000" oninput="calc3()"></div>
+        <div class="fg"><label class="fl">Current Liquid Savings (AED)</label><input type="number" class="fi" id="m3_saved" placeholder="0" oninput="calc3()"></div>
+      </div>
+      <div class="fg">
+        <label class="fl">Recommended Buffer</label>
+        <select class="fs" id="m3_months" onchange="calc3()">
+          <option value="3">3 months (minimum)</option>
+          <option value="6" selected>6 months (recommended)</option>
+          <option value="12">12 months (secure)</option>
+        </select>
+      </div>
+      <div id="r3"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODULE 4 — RETIREMENT / RETURN TO HOME -->
+<div class="module" id="mod4">
+  <div class="module-head" onclick="toggleMod(4)">
+    <div class="module-num">4</div>
+    <div class="module-title">Retirement / Return-to-Home Fund</div>
+    <span class="module-status" id="s4" style="background:var(--off);color:var(--ink3);">Pending</span>
+    <span style="font-size:18px;margin-left:10px;color:var(--ink3);" id="arr4">▼</span>
+  </div>
+  <div class="module-body" id="mb4">
+    <div style="padding-top:16px;">
+      <div style="background:var(--off);border-radius:10px;padding:12px 14px;margin-bottom:14px;border:1px solid var(--border);">
+        <div style="font-size:12px;font-weight:800;color:var(--navy);margin-bottom:4px;">NRI / Expat Planning Note</div>
+        <div style="font-size:13px;color:var(--ink3);line-height:1.6;">This module calculates the lump sum needed when you leave UAE — whether for retirement or return to home country. It accounts for the fact that your UAE income stops completely on that day.</div>
+      </div>
+      <div class="fr2">
+        <div class="fg"><label class="fl">Current Age</label><input type="number" class="fi" id="m4_age" placeholder="40" oninput="calc4()"></div>
+        <div class="fg"><label class="fl">Target Return/Retirement Age</label><input type="number" class="fi" id="m4_retire" placeholder="60" oninput="calc4()"></div>
+      </div>
+      <div class="fr2">
+        <div class="fg"><label class="fl">Target Monthly Income After (AED)</label><input type="number" class="fi" id="m4_income" placeholder="8000" oninput="calc4()"></div>
+        <div class="fg"><label class="fl">Retirement Duration (years)</label><input type="number" class="fi" id="m4_duration" placeholder="25" oninput="calc4()"></div>
+      </div>
+      <div style="font-size:12px;font-weight:800;color:var(--ink3);text-transform:uppercase;letter-spacing:0.06em;margin:14px 0 8px;">Existing Resources at Retirement</div>
+      <div class="fr2">
+        <div class="fg"><label class="fl">DEWS / Gratuity (AED)</label><input type="number" class="fi" id="m4_gratuity" placeholder="0" oninput="calc4()"></div>
+        <div class="fg"><label class="fl">Property / Assets in Home Country (AED)</label><input type="number" class="fi" id="m4_property" placeholder="0" oninput="calc4()"></div>
+      </div>
+      <div class="fr2">
+        <div class="fg"><label class="fl">Other Savings (AED)</label><input type="number" class="fi" id="m4_other" placeholder="0" oninput="calc4()"></div>
+        <div class="fg"><label class="fl">Pension from Home Country (AED/month)</label><input type="number" class="fi" id="m4_pension" placeholder="0" oninput="calc4()"></div>
+      </div>
+      <div id="r4"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODULE 5 — COVERAGE GAP SUMMARY -->
+<div class="module" id="mod5">
+  <div class="module-head" onclick="toggleMod(5)">
+    <div class="module-num">5</div>
+    <div class="module-title">Coverage Gap Summary</div>
+    <span class="module-status" id="s5" style="background:var(--off);color:var(--ink3);">Pending</span>
+    <span style="font-size:18px;margin-left:10px;color:var(--ink3);" id="arr5">▼</span>
+  </div>
+  <div class="module-body" id="mb5">
+    <div style="padding-top:16px;">
+      <div style="font-size:13px;color:var(--ink3);margin-bottom:14px;line-height:1.6;">Complete Modules 1–4 first. This module pulls together all the gaps into a single client-facing summary with your recommendations.</div>
+      <div id="r5"></div>
+    </div>
+  </div>
+</div>
+
+<!-- GENERATE BUTTON -->
+<button class="btn btn-g btn-full" onclick="generateSummary()" style="margin-bottom:8px;font-size:16px;padding:16px;">🎯 Generate Complete FNA Summary</button>
+<button class="btn btn-o btn-full" onclick="saveToContact()" style="margin-bottom:20px;">💾 Save FNA to Client Record</button>
+
+<!-- SUMMARY OUTPUT -->
+<div id="summaryOutput"></div>
+
+</div>
+
+<nav class="nav">
+  <button class="nb" onclick="location.href='today.html'"><span class="ni">🏠</span>Today</button>
+  <button class="nb" onclick="location.href='crm.html'"><span class="ni">👥</span>CRM</button>
+  <button class="nb" onclick="location.href='policies.html'"><span class="ni">📋</span>Policies</button>
+  <button class="nb active"><span class="ni">🧮</span>Calculate</button>
+  <button class="nb" onclick="comingSoon('Leads')"><span class="ni">🎯</span>Leads</button>
+</nav>
+
+<script src="config.js"></script>
+<script src="sheets.js"></script>
+<script src="logout.js"></script>
+<script>
+
+var contacts    = [];
+var selectedC   = null;
+var numChildren = 2;
+var results     = { m1:null, m2:null, m3:null, m4:null };
+
+async function init() {
+  await DB.open();
+  GS.init();
+  contacts = await DB.getAll('contacts');
+  setChildren(2);
+  toggleMod(1);
+}
+
+function comingSoon(n) { toast('📦 ' + n + ' — coming soon'); }
+
+// ── CLIENT SEARCH ─────────────────────────────────
+function searchClient() {
+  var q   = document.getElementById('clientSearch').value.toLowerCase().trim();
+  var res = document.getElementById('clientResults');
+  if (q.length < 1) { res.style.display = 'none'; return; }
+  var m = contacts.filter(function(c) {
+    return c.name.toLowerCase().indexOf(q) > -1 || (c.company||'').toLowerCase().indexOf(q) > -1;
+  }).slice(0, 8);
+  if (!m.length) { res.style.display = 'none'; return; }
+  res.style.display = 'block';
+  res.innerHTML = m.map(function(c) {
+    return '<div onclick="selectClient(\'' + c.id + '\')" style="padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--border);font-size:14px;font-weight:600;" onmouseover="this.style.background=\'var(--off)\'" onmouseout="this.style.background=\'\'">' +
+      c.name + '<span style="color:var(--ink3);font-size:12px;font-weight:400;margin-left:8px;">' + (c.company||'') + '</span></div>';
+  }).join('');
+}
+
+function selectClient(id) {
+  selectedC = contacts.find(function(c) { return c.id === id; });
+  document.getElementById('clientResults').style.display = 'none';
+  document.getElementById('clientSearch').value = selectedC.name;
+  document.getElementById('selectedClient').style.display = 'block';
+  document.getElementById('scName').textContent = selectedC.name;
+  document.getElementById('scSub').textContent  = (selectedC.company||'') + (selectedC.nationality ? ' · ' + selectedC.nationality : '') + (selectedC.yearsUAE ? ' · ' + selectedC.yearsUAE + ' yrs UAE' : '');
+  // Pre-fill where possible
+  if (selectedC.incomeBand) document.getElementById('m1_income').value = selectedC.incomeBand;
+  var age = selectedC.ageBand ? parseInt(selectedC.ageBand) : 0;
+  if (age) { document.getElementById('m1_age').value = age; document.getElementById('m4_age').value = age; }
+  var deps = parseInt(selectedC.dependantsUAE || '0') + parseInt(selectedC.dependantsHome || '0');
+  if (deps > 0) setChildren(Math.min(deps, 4));
+}
+
+function clearClient() {
+  selectedC = null;
+  document.getElementById('clientSearch').value = '';
+  document.getElementById('selectedClient').style.display = 'none';
+}
+
+// ── MODULE TOGGLE ─────────────────────────────────
+function toggleMod(n) {
+  var body = document.getElementById('mb' + n);
+  var arr  = document.getElementById('arr' + n);
+  var open = body.classList.contains('open');
+  body.classList.toggle('open', !open);
+  arr.textContent = open ? '▼' : '▲';
+}
+
+// ── MODULE 1 — INCOME REPLACEMENT ────────────────
+function calc1() {
+  var income   = parseFloat(document.getElementById('m1_income').value)   || 0;
+  var expenses = parseFloat(document.getElementById('m1_expenses').value) || 0;
+  var age      = parseFloat(document.getElementById('m1_age').value)      || 40;
+  var youngest = parseFloat(document.getElementById('m1_youngest').value) || 8;
+  var existing = parseFloat(document.getElementById('m1_existing').value) || 0;
+  var savings  = parseFloat(document.getElementById('m1_savings').value)  || 0;
+  var inflation= parseFloat(document.getElementById('m1_inflation').value)|| 3.5;
+
+  if (!income || !expenses) { document.getElementById('r1').innerHTML = ''; return; }
+
+  var yearsNeeded   = Math.max(0, 18 - youngest + (25 - Math.max(25, age)));
+  yearsNeeded       = Math.max(yearsNeeded, 10);
+  var grossNeed     = expenses * 12 * yearsNeeded * (1 + inflation/100 * yearsNeeded/2);
+  var netGap        = Math.max(0, grossNeed - existing - savings);
+  var monthlyPremEstimate = Math.round(netGap * 0.002);
+
+  results.m1 = { grossNeed:Math.round(grossNeed), netGap:Math.round(netGap), yearsNeeded:Math.round(yearsNeeded), monthlyPremEstimate:monthlyPremEstimate };
+  updateStatus(1, netGap > 0);
+
+  document.getElementById('r1').innerHTML =
+    '<div class="result-box">' +
+      '<div class="result-label">Income Replacement Gap</div>' +
+      '<div class="result-main">AED ' + Math.round(netGap).toLocaleString() + '</div>' +
+      '<div class="result-sub">' +
+        'Coverage needed for ' + Math.round(yearsNeeded) + ' years · ' +
+        'Gross need: AED ' + Math.round(grossNeed).toLocaleString() + '<br>' +
+        'Less existing cover + savings: AED ' + (existing + savings).toLocaleString() + '<br>' +
+        '<strong>Net gap: AED ' + Math.round(netGap).toLocaleString() + '</strong><br>' +
+        'Est. monthly premium: AED ' + monthlyPremEstimate.toLocaleString() +
+      '</div>' +
+    '</div>' +
+    (netGap > 0 ?
+      '<div style="background:var(--amber2);border-radius:10px;padding:12px 14px;margin-top:10px;border:1px solid #F5D5A0;">' +
+        '<div style="font-size:12px;font-weight:800;color:var(--amber);margin-bottom:4px;">KEY QUESTION FOR CLIENT</div>' +
+        '<div style="font-size:13px;color:var(--ink2);font-style:italic;line-height:1.6;">"If you were unable to work tomorrow — how long could your family maintain this lifestyle without your income? Our calculation shows a gap of AED ' + Math.round(netGap).toLocaleString() + '. Would you like to close that gap?"</div>' +
+      '</div>' : '');
+}
+
+// ── MODULE 2 — EDUCATION FUND ─────────────────────
+var EDU_COSTS = {
+  india:     { label:'India 🇮🇳',      annual: 30000 },
+  uae:       { label:'UAE 🇦🇪',        annual: 65000 },
+  uk:        { label:'UK 🇬🇧',         annual: 130000 },
+  usa:       { label:'USA 🇺🇸',        annual: 160000 },
+  australia: { label:'Australia 🇦🇺',  annual: 110000 },
+  canada:    { label:'Canada 🇨🇦',     annual: 95000  },
+  custom:    { label:'Custom',          annual: 0      }
+};
+
+function setChildren(n) {
+  numChildren = n;
+  document.querySelectorAll('.ch-count-btn').forEach(function(b) {
+    b.style.background = parseInt(b.textContent) === n ? 'var(--navy)' : '';
+    b.style.color      = parseInt(b.textContent) === n ? 'white' : '';
+  });
+  var f = document.getElementById('childrenForms');
+  f.innerHTML = '';
+  for (var i = 1; i <= n; i++) {
+    f.innerHTML += buildChildForm(i);
+  }
+  document.querySelectorAll('[onclick*="setChildren"]').forEach(function(b) {
+    b.style.background = b.textContent.trim() === String(n) ? 'var(--navy)' : '';
+    b.style.color      = b.textContent.trim() === String(n) ? 'white' : '';
+  });
+  calc2();
+}
+
+function buildChildForm(i) {
+  var opts = Object.keys(EDU_COSTS).map(function(k) {
+    return '<option value="' + k + '">' + EDU_COSTS[k].label + ' — AED ' + EDU_COSTS[k].annual.toLocaleString() + '/yr</option>';
+  }).join('');
+  return '<div class="child-block">' +
+    '<div style="font-size:14px;font-weight:800;color:var(--navy);margin-bottom:12px;">Child ' + i + '</div>' +
+    '<div class="fr2">' +
+      '<div class="fg"><label class="fl">Current Age</label><input type="number" class="fi ch-age" id="c' + i + '_age" placeholder="' + (i*3) + '" oninput="calc2()" min="0" max="17"></div>' +
+      '<div class="fg"><label class="fl">University Start Age</label><input type="number" class="fi" id="c' + i + '_uni" placeholder="18" value="18" oninput="calc2()"></div>' +
+    '</div>' +
+    '<div class="fg"><label class="fl">Study Destination</label>' +
+      '<select class="fs" id="c' + i + '_dest" onchange="updateCost(' + i + ')">' + opts + '</select>' +
+    '</div>' +
+    '<div class="fr2">' +
+      '<div class="fg"><label class="fl">Annual Cost (AED)</label><input type="number" class="fi" id="c' + i + '_cost" placeholder="65000" oninput="calc2()"></div>' +
+      '<div class="fg"><label class="fl">Study Duration (years)</label><input type="number" class="fi" id="c' + i + '_yrs" placeholder="4" value="4" oninput="calc2()"></div>' +
+    '</div>' +
+  '</div>';
+}
+
+function updateCost(i) {
+  var dest = document.getElementById('c' + i + '_dest').value;
+  var cost = EDU_COSTS[dest] ? EDU_COSTS[dest].annual : 0;
+  if (cost > 0) document.getElementById('c' + i + '_cost').value = cost;
+  calc2();
+}
+
+function calc2() {
+  var totalToday = 0, totalInflated = 0, totalMonthly = 0;
+  var childSummaries = [];
+  var overlapWarning = false;
+  var uniYears = [];
+
+  for (var i = 1; i <= numChildren; i++) {
+    var ageEl  = document.getElementById('c' + i + '_age');
+    var uniEl  = document.getElementById('c' + i + '_uni');
+    var costEl = document.getElementById('c' + i + '_cost');
+    var yrsEl  = document.getElementById('c' + i + '_yrs');
+    if (!ageEl) continue;
+    var age     = parseFloat(ageEl.value)  || 0;
+    var uniAge  = parseFloat(uniEl.value)  || 18;
+    var cost    = parseFloat(costEl.value) || 65000;
+    var dur     = parseFloat(yrsEl.value)  || 4;
+    var yrsLeft = Math.max(0, uniAge - age);
+    var eduInfl = 0.07;
+    var todayCost    = cost * dur;
+    var inflatedCost = cost * dur * Math.pow(1 + eduInfl, yrsLeft);
+    var monthly      = inflatedCost / Math.max(1, yrsLeft * 12);
+    totalToday    += todayCost;
+    totalInflated += inflatedCost;
+    totalMonthly  += monthly;
+    uniYears.push({ start: new Date().getFullYear() + yrsLeft, end: new Date().getFullYear() + yrsLeft + dur });
+    childSummaries.push({
+      num:i, age:age, uniAge:uniAge, yrsLeft:yrsLeft,
+      todayCost:Math.round(todayCost), inflatedCost:Math.round(inflatedCost),
+      monthly:Math.round(monthly)
+    });
+  }
+  // Check overlap
+  for (var a = 0; a < uniYears.length; a++) {
+    for (var b = a+1; b < uniYears.length; b++) {
+      if (uniYears[a].start < uniYears[b].end && uniYears[b].start < uniYears[a].end) overlapWarning = true;
+    }
+  }
+
+  if (!childSummaries.length || totalToday === 0) { document.getElementById('r2').innerHTML = ''; return; }
+
+  results.m2 = { totalToday:Math.round(totalToday), totalInflated:Math.round(totalInflated), totalMonthly:Math.round(totalMonthly), children:childSummaries };
+  updateStatus(2, true);
+
+  var html = '<div class="result-box" style="margin-top:16px;">' +
+    '<div class="result-label">Total Education Liability</div>' +
+    '<div class="result-main">AED ' + Math.round(totalInflated).toLocaleString() + '</div>' +
+    '<div class="result-sub">Today\'s money: AED ' + Math.round(totalToday).toLocaleString() + '<br>Monthly savings needed: AED ' + Math.round(totalMonthly).toLocaleString() + '</div>' +
+  '</div>';
+
+  childSummaries.forEach(function(c) {
+    html += '<div style="background:var(--off);border-radius:10px;padding:12px 14px;margin-top:8px;border:1px solid var(--border);">' +
+      '<div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:4px;">Child ' + c.num + ' — ' + c.yrsLeft + ' years until university</div>' +
+      '<div style="font-size:13px;color:var(--ink2);">Inflated cost: AED ' + c.inflatedCost.toLocaleString() + ' · Monthly: AED ' + c.monthly.toLocaleString() + '</div>' +
+    '</div>';
+  });
+
+  if (overlapWarning) {
+    html += '<div style="background:var(--red2);border-radius:10px;padding:12px 14px;margin-top:8px;border:1px solid #F5C0C0;">' +
+      '<div style="font-size:12px;font-weight:800;color:var(--red);margin-bottom:4px;">⚠️ OVERLAP DETECTED</div>' +
+      '<div style="font-size:13px;color:var(--ink2);">Two or more children will be in university at the same time. Peak monthly cost doubles during this period. Plan for this now.</div>' +
+    '</div>';
+  }
+  document.getElementById('r2').innerHTML = html;
+}
+
+// ── MODULE 3 — EMERGENCY FUND ─────────────────────
+function calc3() {
+  var exp    = parseFloat(document.getElementById('m3_exp').value)   || 0;
+  var saved  = parseFloat(document.getElementById('m3_saved').value) || 0;
+  var months = parseFloat(document.getElementById('m3_months').value)|| 6;
+  if (!exp) { document.getElementById('r3').innerHTML = ''; return; }
+  var target = exp * months;
+  var gap    = Math.max(0, target - saved);
+  results.m3 = { target:Math.round(target), saved:Math.round(saved), gap:Math.round(gap), months:months };
+  updateStatus(3, true);
+  document.getElementById('r3').innerHTML =
+    '<div class="result-box" style="margin-top:16px;">' +
+      '<div class="result-label">Emergency Fund Gap</div>' +
+      '<div class="result-main">AED ' + Math.round(gap).toLocaleString() + '</div>' +
+      '<div class="result-sub">' +
+        'Target (' + months + ' months): AED ' + Math.round(target).toLocaleString() + '<br>' +
+        'Currently saved: AED ' + Math.round(saved).toLocaleString() + '<br>' +
+        (gap > 0 ? '<strong>Gap to close: AED ' + Math.round(gap).toLocaleString() + '</strong>' : '✅ Emergency fund is adequate') +
+      '</div>' +
+    '</div>';
+}
+
+// ── MODULE 4 — RETIREMENT ─────────────────────────
+function calc4() {
+  var age      = parseFloat(document.getElementById('m4_age').value)     || 40;
+  var retire   = parseFloat(document.getElementById('m4_retire').value)  || 60;
+  var income   = parseFloat(document.getElementById('m4_income').value)  || 8000;
+  var duration = parseFloat(document.getElementById('m4_duration').value)|| 25;
+  var gratuity = parseFloat(document.getElementById('m4_gratuity').value)|| 0;
+  var property = parseFloat(document.getElementById('m4_property').value)|| 0;
+  var other    = parseFloat(document.getElementById('m4_other').value)   || 0;
+  var pension  = parseFloat(document.getElementById('m4_pension').value) || 0;
+  if (!income) { document.getElementById('r4').innerHTML = ''; return; }
+  var yearsToRetire = Math.max(0, retire - age);
+  var inflatedIncome= income * Math.pow(1.035, yearsToRetire);
+  var pensionLumpsum= pension * 12 * duration;
+  var totalNeed     = inflatedIncome * 12 * duration;
+  var totalResources= gratuity + property + other + pensionLumpsum;
+  var gap           = Math.max(0, totalNeed - totalResources);
+  var monthlyNeeded = gap / Math.max(1, yearsToRetire * 12);
+  results.m4 = { totalNeed:Math.round(totalNeed), totalResources:Math.round(totalResources), gap:Math.round(gap), monthlyNeeded:Math.round(monthlyNeeded), yearsToRetire:yearsToRetire };
+  updateStatus(4, true);
+  document.getElementById('r4').innerHTML =
+    '<div class="result-box" style="margin-top:16px;">' +
+      '<div class="result-label">Retirement / Return-to-Home Gap</div>' +
+      '<div class="result-main">AED ' + Math.round(gap).toLocaleString() + '</div>' +
+      '<div class="result-sub">' +
+        'Years to retirement: ' + yearsToRetire + '<br>' +
+        'Total fund needed: AED ' + Math.round(totalNeed).toLocaleString() + '<br>' +
+        'Existing resources: AED ' + Math.round(totalResources).toLocaleString() + '<br>' +
+        '<strong>Gap: AED ' + Math.round(gap).toLocaleString() + '</strong><br>' +
+        'Monthly savings needed: AED ' + Math.round(monthlyNeeded).toLocaleString() +
+      '</div>' +
+    '</div>';
+}
+
+// ── MODULE 5 + SUMMARY ────────────────────────────
+function updateStatus(n, done) {
+  var el = document.getElementById('s' + n);
+  el.textContent = done ? 'Done ✓' : 'Pending';
+  el.style.background = done ? 'var(--green2)' : 'var(--off)';
+  el.style.color      = done ? 'var(--green)' : 'var(--ink3)';
+  showMod5Preview();
+}
+
+function showMod5Preview() {
+  var el  = document.getElementById('r5');
+  var any = results.m1 || results.m2 || results.m3 || results.m4;
+  if (!any) { el.innerHTML = '<div style="font-size:13px;color:var(--ink3);">Complete modules above to see summary here.</div>'; return; }
+
+  var rows = '';
+  if (results.m1) rows += gapRow('Income Replacement', results.m1.netGap);
+  if (results.m2) rows += gapRow('Education Fund', results.m2.totalInflated);
+  if (results.m3) rows += gapRow('Emergency Fund', results.m3.gap);
+  if (results.m4) rows += gapRow('Retirement Fund', results.m4.gap);
+
+  var total = (results.m1 ? results.m1.netGap : 0) +
+              (results.m2 ? results.m2.totalInflated : 0) +
+              (results.m3 ? results.m3.gap : 0) +
+              (results.m4 ? results.m4.gap : 0);
+
+  el.innerHTML = rows +
+    '<div class="gap-row" style="background:var(--navy);margin-top:4px;">' +
+      '<div style="font-size:15px;font-weight:800;color:white;">TOTAL PROTECTION GAP</div>' +
+      '<div style="font-size:18px;font-weight:800;color:#E8B86A;">AED ' + Math.round(total).toLocaleString() + '</div>' +
+    '</div>';
+  updateStatus(5, total > 0);
+}
+
+function gapRow(label, value) {
+  return '<div class="gap-row">' +
+    '<div class="gap-label">' + label + '</div>' +
+    '<div class="gap-value ' + (value > 0 ? 'gap-negative' : 'gap-positive') + '">AED ' + Math.round(value||0).toLocaleString() + '</div>' +
+  '</div>';
+}
+
+function generateSummary() {
+  var total = (results.m1 ? results.m1.netGap : 0) +
+              (results.m2 ? results.m2.totalInflated : 0) +
+              (results.m3 ? results.m3.gap : 0) +
+              (results.m4 ? results.m4.gap : 0);
+
+  if (total === 0) { toast('Complete at least one module first'); return; }
+
+  var clientName = selectedC ? selectedC.name : 'Your Client';
+  var recPremium = Math.round((results.m1 ? results.m1.monthlyPremEstimate : 0) +
+                              (results.m2 ? results.m2.totalMonthly * 0.5 : 0) +
+                              (results.m3 ? results.m3.gap / 60 : 0) +
+                              (results.m4 ? results.m4.monthlyNeeded * 0.3 : 0));
+
+  var html =
+    '<div class="summary-card">' +
+      '<div style="font-size:11px;opacity:0.6;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;margin-bottom:6px;">Financial Needs Analysis</div>' +
+      '<div style="font-family:Playfair Display,serif;font-size:24px;font-weight:700;margin-bottom:4px;">' + clientName + '</div>' +
+      '<div style="font-size:12px;opacity:0.6;margin-bottom:18px;">' + new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}) + ' · Prepared by Babu Raj · Cert CII 99%</div>' +
+      (results.m1 ? '<div class="summary-row"><span style="opacity:0.75;font-size:14px;">Income Replacement Gap</span><span style="font-weight:800;color:#E8B86A;">AED ' + results.m1.netGap.toLocaleString() + '</span></div>' : '') +
+      (results.m2 ? '<div class="summary-row"><span style="opacity:0.75;font-size:14px;">Education Fund (' + results.m2.children.length + ' child' + (results.m2.children.length>1?'ren':'') + ')</span><span style="font-weight:800;color:#E8B86A;">AED ' + results.m2.totalInflated.toLocaleString() + '</span></div>' : '') +
+      (results.m3 ? '<div class="summary-row"><span style="opacity:0.75;font-size:14px;">Emergency Fund Gap</span><span style="font-weight:800;color:#E8B86A;">AED ' + results.m3.gap.toLocaleString() + '</span></div>' : '') +
+      (results.m4 ? '<div class="summary-row"><span style="opacity:0.75;font-size:14px;">Retirement / Return-to-Home</span><span style="font-weight:800;color:#E8B86A;">AED ' + results.m4.gap.toLocaleString() + '</span></div>' : '') +
+      '<div class="summary-row" style="border-top:1px solid rgba(255,255,255,0.2);padding-top:14px;margin-top:4px;">' +
+        '<span style="font-size:16px;font-weight:800;">TOTAL PROTECTION GAP</span>' +
+        '<span style="font-family:Playfair Display,serif;font-size:28px;font-weight:700;color:#E8B86A;">AED ' + Math.round(total).toLocaleString() + '</span>' +
+      '</div>' +
+    '</div>' +
+    '<div class="proposal-box">' +
+      '<div style="font-size:11px;opacity:0.8;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;margin-bottom:10px;">My Recommendation</div>' +
+      '<div style="font-size:14px;line-height:1.8;margin-bottom:16px;">Based on your complete financial picture, I recommend addressing your protection gap with a structured plan starting at <strong>AED ' + recPremium.toLocaleString() + '/month</strong>. This is approximately <strong>' + (selectedC && selectedC.incomeBand ? Math.round(recPremium/parseFloat(selectedC.incomeBand)*100) : '?') + '%</strong> of your monthly income — within the recommended 10–15% range.</div>' +
+      '<div style="font-size:13px;opacity:0.9;font-style:italic;">"Does this feel like the right protection for your family?"</div>' +
+    '</div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+      (selectedC && selectedC.phone ?
+        '<a href="' + U.waLink(selectedC.phone, 'Dear ' + clientName + ', here is a summary of your Financial Needs Analysis completed today. Your total protection gap is AED ' + Math.round(total).toLocaleString() + '. I will send the full details shortly. — Babu Raj, Cert CII') + '" target="_blank" class="btn btn-wa">💬 WhatsApp Summary</a>' : '') +
+      '<button onclick="saveToContact()" class="btn btn-p">💾 Save to Record</button>' +
+      '<button onclick="resetFNA()" class="btn btn-o">🔄 New FNA</button>' +
+    '</div>';
+
+  document.getElementById('summaryOutput').innerHTML = html;
+  document.getElementById('summaryOutput').scrollIntoView({behavior:'smooth'});
+  toast('✅ FNA Summary generated');
+}
+
+async function saveToContact() {
+  if (!selectedC) { toast('Please select a client first'); return; }
+  var total = (results.m1 ? results.m1.netGap : 0) +
+              (results.m2 ? results.m2.totalInflated : 0) +
+              (results.m3 ? results.m3.gap : 0) +
+              (results.m4 ? results.m4.gap : 0);
+  var fna = {
+    id: U.id(), contactId: selectedC.id, contactName: selectedC.name,
+    date: U.today(), incomeGap: results.m1 ? results.m1.netGap : 0,
+    educationGap: results.m2 ? results.m2.totalInflated : 0,
+    emergencyGap: results.m3 ? results.m3.gap : 0,
+    retirementGap: results.m4 ? results.m4.gap : 0,
+    totalGap: Math.round(total), created: new Date().toISOString()
+  };
+  await DB.put('fna', fna);
+  GS.addToQueue('append', SHEETS.fna, [fna.id, fna.contactId, fna.contactName, fna.date, fna.incomeGap, fna.educationGap, fna.emergencyGap, fna.retirementGap, fna.totalGap, '', '', '', '', '', '']);
+  // Log interaction
+  var log = { id:U.id(), contactId:selectedC.id, contact:selectedC.name, date:U.today(), time:U.now(), dayOfWeek:U.dayOfWeek(), hora:getHora().current.name, channel:'Meeting', tags:['Needs FNA','FNA Completed'], note:'FNA completed. Total protection gap: AED ' + Math.round(total).toLocaleString(), next:'Present proposal', followup:'', created:new Date().toISOString() };
+  await DB.put('logs', log);
+  toast('✅ FNA saved to ' + selectedC.name + '\'s record');
+}
+
+function resetFNA() {
+  results = {m1:null,m2:null,m3:null,m4:null};
+  ['m1_income','m1_expenses','m1_age','m1_youngest','m1_existing','m1_savings',
+   'm3_exp','m3_saved','m4_age','m4_retire','m4_income','m4_duration',
+   'm4_gratuity','m4_property','m4_other','m4_pension'].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.value = '';
+  });
+  [1,2,3,4,5].forEach(function(n) {
+    document.getElementById('r'+n).innerHTML = '';
+    updateStatus(n, false);
+  });
+  document.getElementById('summaryOutput').innerHTML = '';
+  setChildren(2);
+  toast('FNA reset');
+}
+
+function openMod(html)  { document.getElementById('mBody').innerHTML = html; document.getElementById('mOv').classList.add('open'); }
+function closeMod()     { document.getElementById('mOv').classList.remove('open'); }
+document.getElementById('mOv').addEventListener('click', function(e) { if (e.target === document.getElementById('mOv')) closeMod(); });
+function toast(msg, dur) { dur=dur||2500; var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(function(){t.classList.remove('show');},dur); }
+
+init();
+</script>
+</body>
+</html>
