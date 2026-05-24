@@ -290,481 +290,384 @@ async function init() {
   renderContacts(); renderLogs(); renderPipeline();
 }
 
-function swTab(id, el) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('tab-' + id).classList.add('active');
-  el.classList.add('active');
-  if (id === 'contacts') renderContacts();
-  if (id === 'pipeline') renderPipeline();
-  if (id === 'log')      renderLogs();
-}
-
+function goTo(page) { window.location.href = page; }
+function comingSoon(name) { toast('📦 ' + name + ' — coming in the next session'); }
 function setMode(m) {
-  document.getElementById('bizBtn').classList.toggle('active', m === 'business');
-  document.getElementById('cliBtn').classList.toggle('active', m === 'client');
+  document.getElementById('bizBtn').classList.toggle('active', m==='business');
+  document.getElementById('cliBtn').classList.toggle('active', m==='client');
 }
 
-function fSt(s) { statusFilter = s; renderContacts(); }
+function swTab(id, el) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active'); el.classList.add('active');
+  if(id==='contacts') renderContacts();
+  if(id==='pipeline') renderPipeline();
+  if(id==='log')      renderLogs();
+}
+
+function fSt(s) { statusFilter=s; renderContacts(); }
 
 function renderContacts() {
   const search = (document.getElementById('csInp')||{value:''}).value.toLowerCase();
   const sortBy = (document.getElementById('sortBy')||{value:'score'}).value;
   let filtered = contacts.filter(c => {
-    const ms  = !search || [c.name,c.company,c.phone,c.email].some(f => (f||'').toLowerCase().includes(search));
-    const mst = !statusFilter || c.status === statusFilter;
-    return ms && mst;
-  });
-  filtered = filtered.map(c => ({ ...c, _score: calcScore(c, logs) }));
+    const ms  = !search||[c.name,c.company,c.phone,c.email].some(f=>(f||'').toLowerCase().includes(search));
+    const mst = !statusFilter||c.status===statusFilter;
+    return ms&&mst;
+  }).map(c=>({...c,_score:calcScore(c,logs)}));
   filtered.sort((a,b) => {
-    if (sortBy === 'score')   return b._score - a._score;
-    if (sortBy === 'name')    return (a.name||'').localeCompare(b.name||'');
-    if (sortBy === 'premium') return (b.premium||0) - (a.premium||0);
-    if (sortBy === 'added')   return new Date(b.dateAdded||0) - new Date(a.dateAdded||0);
-    if (sortBy === 'followup') {
-      if (!a.followup) return 1; if (!b.followup) return -1;
-      return new Date(a.followup) - new Date(b.followup);
-    }
+    if(sortBy==='score')    return b._score-a._score;
+    if(sortBy==='name')     return (a.name||'').localeCompare(b.name||'');
+    if(sortBy==='premium')  return (b.premium||0)-(a.premium||0);
+    if(sortBy==='added')    return new Date(b.dateAdded||0)-new Date(a.dateAdded||0);
+    if(sortBy==='followup') { if(!a.followup)return 1; if(!b.followup)return-1; return new Date(a.followup)-new Date(b.followup); }
     return 0;
   });
-  document.getElementById('contactCount').textContent = filtered.length + ' contact' + (filtered.length !== 1 ? 's' : '');
-  const PL = { life:'Life', invest:'Investment', savings:'Savings', sme:'SME Med', group:'Group Life', takaful:'Takaful' };
-  const PC = { life:'p-life', invest:'p-inv', savings:'p-sav', sme:'p-sme', group:'p-grp', takaful:'p-grp' };
-  const el = document.getElementById('contactsList');
-  if (!filtered.length) {
-    el.innerHTML = '<div class="empty"><div class="empty-i">👥</div><div class="empty-t">No contacts found.<br>Add your first contact in the Add tab.</div></div>';
-    return;
-  }
-  const sc = filtered[0];
-  el.innerHTML = filtered.map(c => {
-    const score = c._score;
-    const sCls  = score >= 70 ? 'score-high' : score >= 40 ? 'score-mid' : 'score-low';
-    const waMsg = U.touchMsg(c);
-    const lastLog = logs.filter(l => l.contactId === c.id).sort((a,b) => new Date(b.date)-new Date(a.date))[0];
-    const lastContact = lastLog ? U.fmt(lastLog.date) : 'Never';
-    const flagNRI   = c.nriFlag   ? '<span class="prod-b p-life" style="background:#FFF8EE;color:#8A5A20;">NRI</span>' : '';
-    const flagSME   = c.smeFlag   ? '<span class="prod-b p-sme">SME</span>' : '';
-    const flagTak   = c.takafulFlag ? '<span class="prod-b p-grp" style="background:#F0F8FF;color:#2A7AAA;">Takaful</span>' : '';
-    return `<div class="cc" id="cc-${c.id}">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
-        <div style="flex:1;">
-          <div class="cc-name">${c.name}</div>
-          <div class="cc-sub">${c.company||''}${c.jobTitle?' · '+c.jobTitle:''}</div>
-          <div style="font-size:11px;color:var(--ink3);margin-top:2px;">${c.nationality||''} · Last: ${lastContact}</div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;margin-left:10px;">
-          <span class="badge b-${c.status||'cold'}">${c.status||'cold'}</span>
-          <div class="cc-score ${sCls}">${score}</div>
-        </div>
-      </div>
-      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">
-        ${(c.products||[]).map(p=>`<span class="prod-b ${PC[p]||''}">${PL[p]||p}</span>`).join('')}
-        ${flagNRI}${flagSME}${flagTak}
-        ${c.followup?`<span class="prod-b" style="background:#FFF0EE;color:#B84040;">📅 ${U.fmt(c.followup)}</span>`:''}
-        ${c.premium?`<span class="prod-b" style="background:#E8F5EE;color:#2E7D52;">AED ${Number(c.premium).toLocaleString()}/yr</span>`:''}
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        ${c.phone?`<a href="${U.callLink(c.phone)}" class="act-btn act-call">📞 Call</a>`:''}
-        ${c.phone?`<a href="${U.waLink(c.phone,waMsg)}" target="_blank" class="act-btn act-wa">💬 Touch ${c.touch||1}</a>`:''}
-        <button class="act-btn act-log" onclick="quickLog('${c.id}','${c.name.replace(/'/g,"\\'")}')">⚡ Log</button>
-        <button class="act-btn act-fna" onclick="location.href='calculators.html?cid=${c.id}'">📋 FNA</button>
-        <button class="act-btn" style="background:var(--bg3);color:var(--ink2);" onclick="viewContact('${c.id}')">👁 View</button>
-      </div>
-    </div>`;
+  document.getElementById('contactCount').textContent = filtered.length+' contact'+(filtered.length!==1?'s':'');
+  const PL={life:'Life',invest:'Investment',savings:'Savings',sme:'SME Med',group:'Group Life',takaful:'Takaful'};
+  const PC={life:'p-life',invest:'p-inv',savings:'p-sav',sme:'p-sme',group:'p-grp',takaful:'p-grp'};
+  const el=document.getElementById('contactsList');
+  if(!filtered.length){el.innerHTML='<div class="empty"><div class="empty-i">👥</div><div class="empty-t">No contacts found.<br>Add your first contact in the Add tab.</div></div>';return;}
+  el.innerHTML=filtered.map(c=>{
+    const score=c._score;
+    const sCls=score>=70?'score-high':score>=40?'score-mid':'score-low';
+    const lastLog=logs.filter(l=>l.contactId===c.id).sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+    const lastContact=lastLog?U.fmt(lastLog.date):'Never';
+    return '<div class="cc">'+
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">'+
+        '<div style="flex:1;">'+
+          '<div class="cc-name">'+c.name+'</div>'+
+          '<div class="cc-sub">'+(c.company||'')+(c.jobTitle?' · '+c.jobTitle:'')+'</div>'+
+          '<div style="font-size:11px;color:#8A7A70;margin-top:2px;">'+(c.nationality||'')+' · Last: '+lastContact+'</div>'+
+        '</div>'+
+        '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;margin-left:10px;">'+
+          '<span class="badge b-'+(c.status||'cold')+'">'+(c.status||'cold')+'</span>'+
+          '<div class="cc-score '+sCls+'">'+score+'</div>'+
+        '</div>'+
+      '</div>'+
+      '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">'+
+        (c.products||[]).map(p=>'<span class="prod-b '+(PC[p]||'')+'">'+(PL[p]||p)+'</span>').join('')+
+        (c.nriFlag?'<span class="prod-b" style="background:#FFF8EE;color:#8A5A20;">NRI</span>':'')+
+        (c.smeFlag?'<span class="prod-b p-sme">SME</span>':'')+
+        (c.takafulFlag?'<span class="prod-b p-grp">Takaful</span>':'')+
+        (c.followup?'<span class="prod-b" style="background:#FFF0EE;color:#B84040;">📅 '+U.fmt(c.followup)+'</span>':'')+
+        (c.premium?'<span class="prod-b" style="background:#E8F5EE;color:#2E7D52;">AED '+Number(c.premium).toLocaleString()+'/yr</span>':'')+
+      '</div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;">'+
+        (c.phone?'<a href="'+U.callLink(c.phone)+'" style="background:#EEF4FF;color:#2A5AAA;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:700;text-decoration:none;">📞 Call</a>':'')+
+        (c.phone?'<a href="'+U.waLink(c.phone,U.touchMsg(c))+'" target="_blank" style="background:#E8FAF0;color:#1A7A42;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:700;text-decoration:none;">💬 Touch '+(c.touch||1)+'</a>':'')+
+        '<button onclick="quickLog(\''+c.id+'\',\''+c.name.replace(/'/g,"\\'")+'\')" style="background:#F2EBE0;color:#3A2E28;border:none;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:700;cursor:pointer;">⚡ Log</button>'+
+        '<button onclick="viewContact(\''+c.id+'\')" style="background:#F2EBE0;color:#3A2E28;border:none;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:700;cursor:pointer;">👁 View</button>'+
+      '</div>'+
+    '</div>';
   }).join('');
 }
 
 function viewContact(id) {
-  const c     = contacts.find(x => x.id === id); if (!c) return;
-  const score = calcScore(c, logs);
-  const cLogs = logs.filter(l => l.contactId === id).sort((a,b) => new Date(b.date)-new Date(a.date));
-  const logsHtml = cLogs.slice(0,5).map(l =>
-    `<div style="padding:10px;border-bottom:1px solid var(--border);">
-      <div style="font-size:11px;color:var(--ink3);">${U.fmt(l.date)} · ${l.channel||''} ${l.hora?'· '+l.hora+' hora':''}</div>
-      <div style="font-size:13px;color:var(--ink2);margin-top:3px;">${l.note||''}</div>
-      ${l.next?`<div style="font-size:12px;color:var(--sage);margin-top:2px;">→ ${l.next}</div>`:''}
-    </div>`
-  ).join('') || '<div style="padding:12px;font-size:13px;color:var(--ink3);">No interactions logged yet.</div>';
-
-  openMod(`
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
-      <div>
-        <div style="font-family:Playfair Display,serif;font-size:22px;color:var(--navy);">${c.name}</div>
-        <div style="font-size:14px;color:var(--ink3);">${c.company||''} ${c.jobTitle?'· '+c.jobTitle:''}</div>
-      </div>
-      <div style="text-align:right;">
-        <span class="badge b-${c.status||'cold'}">${c.status||'cold'}</span>
-        <div style="font-size:20px;font-weight:700;color:var(--gold);margin-top:4px;">${score}</div>
-        <div style="font-size:10px;color:var(--ink3);">Lead Score</div>
-      </div>
-    </div>
-    <div class="brief-section">
-      <div class="brief-label">Contact Details</div>
-      <div class="brief-content">
-        ${c.phone?`📞 <a href="${U.callLink(c.phone)}" style="color:var(--sky);">${c.phone}</a><br>`:''}
-        ${c.email?`✉️ ${c.email}<br>`:''}
-        ${c.nationality?`🌍 ${c.nationality}`:''}
-        ${c.yearsUAE?` · ${c.yearsUAE} yrs UAE`:''}
-        ${c.dependantsUAE?` · ${c.dependantsUAE} dep. UAE`:''}
-        ${c.dependantsHome?` · ${c.dependantsHome} dep. home`:''}
-      </div>
-    </div>
-    <div class="brief-section">
-      <div class="brief-label">Sequence & Opportunity</div>
-      <div class="brief-content">
-        Touch ${c.touch||1} of 3 · ${(c.products||[]).join(', ')||'No products tagged'}<br>
-        Est. Premium: AED ${Number(c.premium||0).toLocaleString()}/yr<br>
-        Source: ${c.source||'Unknown'}${c.referredBy?' · Referred by: '+c.referredBy:''}
-        ${c.notes?`<br><em>${c.notes}</em>`:''}
-      </div>
-    </div>
-    <div class="brief-section">
-      <div class="brief-label">Interaction History (${cLogs.length} total)</div>
-    </div>
-    <div style="background:white;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px;">${logsHtml}</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      ${c.phone?`<a href="${U.callLink(c.phone)}" class="btn btn-sky btn-sm">📞 Call</a>`:''}
-      ${c.phone?`<a href="${U.waLink(c.phone,U.touchMsg(c))}" target="_blank" class="btn btn-wa btn-sm">💬 WhatsApp</a>`:''}
-      <button class="btn btn-p btn-sm" onclick="closeMod();quickLog('${c.id}','${c.name.replace(/'/g,"\\'")}')">⚡ Log</button>
-      <button class="btn btn-g btn-sm" onclick="cycleStatus('${c.id}');closeMod();">Status ↻</button>
-      <button class="btn btn-r btn-sm" onclick="if(confirm('Delete ${c.name}?')){deleteContact('${c.id}');closeMod();}">Delete</button>
-    </div>`);
+  const c=contacts.find(x=>x.id===id); if(!c) return;
+  const score=calcScore(c,logs);
+  const cLogs=logs.filter(l=>l.contactId===id).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const logsHtml=cLogs.slice(0,5).map(l=>
+    '<div style="padding:10px;border-bottom:1px solid rgba(26,20,16,0.1);">'+
+      '<div style="font-size:11px;color:#8A7A70;">'+U.fmt(l.date)+' · '+(l.channel||'')+(l.hora?' · '+l.hora+' hora':'')+'</div>'+
+      '<div style="font-size:13px;color:#3A2E28;margin-top:3px;">'+(l.note||'')+'</div>'+
+      (l.next?'<div style="font-size:12px;color:#5A8A62;margin-top:2px;">→ '+l.next+'</div>':'')+
+    '</div>'
+  ).join('')||'<div style="padding:12px;font-size:13px;color:#8A7A70;">No interactions logged yet.</div>';
+  openMod(
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">'+
+      '<div><div style="font-family:Playfair Display,serif;font-size:22px;color:#1B3A5C;">'+c.name+'</div>'+
+      '<div style="font-size:14px;color:#8A7A70;">'+(c.company||'')+(c.jobTitle?' · '+c.jobTitle:'')+'</div></div>'+
+      '<div style="text-align:right;"><span class="badge b-'+(c.status||'cold')+'">'+(c.status||'cold')+'</span>'+
+      '<div style="font-size:20px;font-weight:700;color:#C9893A;margin-top:4px;">'+score+'</div>'+
+      '<div style="font-size:10px;color:#8A7A70;">Lead Score</div></div>'+
+    '</div>'+
+    '<div style="background:#F2EBE0;border-radius:10px;padding:12px 14px;margin-bottom:10px;">'+
+      '<div style="font-size:11px;font-weight:700;color:#C9893A;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">Contact</div>'+
+      '<div style="font-size:13px;color:#3A2E28;line-height:1.8;">'+
+        (c.phone?'📞 <a href="'+U.callLink(c.phone)+'" style="color:#4A7AAA;">'+c.phone+'</a><br>':'')+
+        (c.email?'✉️ '+c.email+'<br>':'')+
+        (c.nationality?'🌍 '+c.nationality:'')+(c.yearsUAE?' · '+c.yearsUAE+' yrs UAE':'')+
+      '</div>'+
+    '</div>'+
+    '<div style="background:#F2EBE0;border-radius:10px;padding:12px 14px;margin-bottom:10px;">'+
+      '<div style="font-size:11px;font-weight:700;color:#C9893A;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">Opportunity</div>'+
+      '<div style="font-size:13px;color:#3A2E28;line-height:1.8;">'+
+        'Touch '+(c.touch||1)+' of 3 · '+((c.products||[]).join(', ')||'No products tagged')+'<br>'+
+        'Est. Premium: AED '+Number(c.premium||0).toLocaleString()+'/yr<br>'+
+        'Source: '+(c.source||'Unknown')+(c.referredBy?' · Referred by: '+c.referredBy:'')+
+        (c.notes?'<br><em style="color:#8A7A70;">'+c.notes+'</em>':'')+
+      '</div>'+
+    '</div>'+
+    '<div style="background:#F2EBE0;border-radius:10px;padding:12px 14px;margin-bottom:10px;">'+
+      '<div style="font-size:11px;font-weight:700;color:#C9893A;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">History ('+cLogs.length+' interactions)</div>'+
+    '</div>'+
+    '<div style="background:white;border:1px solid rgba(26,20,16,0.1);border-radius:10px;overflow:hidden;margin-bottom:16px;">'+logsHtml+'</div>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;">'+
+      (c.phone?'<a href="'+U.callLink(c.phone)+'" style="background:#4A7AAA;color:white;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:700;text-decoration:none;">📞 Call</a>':'')+
+      (c.phone?'<a href="'+U.waLink(c.phone,U.touchMsg(c))+'" target="_blank" style="background:#25D366;color:white;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:700;text-decoration:none;">💬 WhatsApp</a>':'')+
+      '<button onclick="closeMod();quickLog(\''+c.id+'\',\''+c.name.replace(/'/g,"\\'")+'\')" style="background:#1B3A5C;color:white;border:none;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer;">⚡ Log</button>'+
+      '<button onclick="cycleStatus(\''+c.id+'\');closeMod();" style="background:#C9893A;color:white;border:none;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer;">Status ↻</button>'+
+      '<button onclick="if(confirm(\'Delete '+c.name+'?\')){deleteContact(\''+c.id+'\');closeMod();}" style="background:#B84040;color:white;border:none;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer;">Delete</button>'+
+    '</div>'
+  );
 }
 
-function quickLog(id, name) {
-  document.getElementById('lgSearch').value = name;
-  document.getElementById('lgContactId').value = id;
-  document.getElementById('lgContactName').value = name;
-  logContactId = id; logContactName = name;
-  // Switch to log tab
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('tab-log').classList.add('active');
-  document.querySelectorAll('.tab')[2].classList.add('active');
-  document.getElementById('lgNote').focus();
+function quickLog(id,name) {
+  document.getElementById('lgSearch').value=name;
+  logContactId=id; logContactName=name;
+  swTab('log',document.querySelectorAll('.tab')[2]);
+  setTimeout(()=>document.getElementById('lgNote').focus(),100);
 }
 
 function searchForLog() {
-  const q   = document.getElementById('lgSearch').value.toLowerCase();
-  const res = document.getElementById('lgResults');
-  if (q.length < 2) { res.style.display='none'; return; }
-  const matches = contacts.filter(c => c.name.toLowerCase().includes(q) || (c.company||'').toLowerCase().includes(q)).slice(0,6);
-  if (!matches.length) { res.style.display='none'; return; }
-  res.style.display = 'block';
-  res.innerHTML = matches.map(c =>
-    `<div onclick="selectLogContact('${c.id}','${c.name.replace(/'/g,"\\'")}','${c.company||''}','${c.phone||''}')" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);font-size:14px;" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
-      <strong>${c.name}</strong> <span style="color:var(--ink3);font-size:12px;">${c.company||''}</span>
-    </div>`
+  const q=document.getElementById('lgSearch').value.toLowerCase();
+  const res=document.getElementById('lgResults');
+  if(q.length<2){res.style.display='none';return;}
+  const matches=contacts.filter(c=>c.name.toLowerCase().includes(q)||(c.company||'').toLowerCase().includes(q)).slice(0,6);
+  if(!matches.length){res.style.display='none';return;}
+  res.style.display='block';
+  res.innerHTML=matches.map(c=>
+    '<div onclick="selectLogContact(\''+c.id+'\',\''+c.name.replace(/'/g,"\\'")+'\',\''+c.company+'\',\''+c.phone+'\')" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid rgba(26,20,16,0.08);font-size:14px;" onmouseover="this.style.background=\'#F2EBE0\'" onmouseout="this.style.background=\'\'">'+
+      '<strong>'+c.name+'</strong> <span style="color:#8A7A70;font-size:12px;">'+(c.company||'')+'</span>'+
+    '</div>'
   ).join('');
 }
 
-function selectLogContact(id, name, company, phone) {
-  logContactId   = id;
-  logContactName = name;
-  document.getElementById('lgSearch').value = name + (company ? ' · ' + company : '');
-  document.getElementById('lgContactId').value = id;
-  document.getElementById('lgResults').style.display = 'none';
+function selectLogContact(id,name,company,phone) {
+  logContactId=id; logContactName=name;
+  document.getElementById('lgSearch').value=name+(company?' · '+company:'');
+  document.getElementById('lgResults').style.display='none';
   document.getElementById('lgNote').focus();
 }
 
 function selCh(el) {
-  document.querySelectorAll('.ch-btn').forEach(b => { b.classList.remove('active'); b.style.background=''; b.style.color=''; });
-  el.classList.add('active');
-  el.style.background = 'var(--navy)'; el.style.color = 'white';
-  selChannel = el.dataset.ch;
+  document.querySelectorAll('.ch-btn').forEach(b=>{b.style.background='';b.style.color='';});
+  el.style.background='#1B3A5C'; el.style.color='white';
+  selChannel=el.dataset.ch;
 }
 
 function togTag(el) {
-  const tag = el.textContent.trim();
-  if (selTags.includes(tag)) {
-    selTags = selTags.filter(t => t !== tag);
-    el.style.background = ''; el.style.color = '';
-  } else {
-    selTags.push(tag);
-    el.style.background = 'var(--navy)'; el.style.color = 'white';
-  }
+  const tag=el.textContent.trim();
+  if(selTags.includes(tag)){selTags=selTags.filter(t=>t!==tag);el.style.background='';el.style.color='';}
+  else{selTags.push(tag);el.style.background='#1B3A5C';el.style.color='white';}
 }
 
 async function saveLog() {
-  const note = document.getElementById('lgNote').value.trim();
-  if (!logContactId && !document.getElementById('lgSearch').value.trim()) { toast('Please select or search a contact'); return; }
-  if (!note) { toast('Please add a note'); return; }
-  const h = getHora();
-  const log = {
-    id: U.id(), contactId: logContactId, contact: logContactName || document.getElementById('lgSearch').value,
-    date: U.today(), time: U.now(), dayOfWeek: U.dayOfWeek(),
-    hora: h.current.name, channel: selChannel, tags: [...selTags],
-    note, next: document.getElementById('lgNext').value,
-    followup: document.getElementById('lgDate').value,
-    created: new Date().toISOString()
-  };
-  await DB.put('logs', log);
-  GS.addToQueue('append', SHEETS.logs, [log.id,log.contactId,log.contact,log.date,log.time,log.dayOfWeek,log.hora,log.channel,log.tags.join(','),log.note,log.next,log.followup,'']);
-  // Update contact follow-up date and touch number
-  if (logContactId) {
-    const c = contacts.find(x => x.id === logContactId);
-    if (c) {
-      if (document.getElementById('lgDate').value) c.followup = document.getElementById('lgDate').value;
-      // Auto-advance touch if tags suggest engagement
-      if (selTags.includes('Interested') || selTags.includes('Meeting Booked')) {
-        c.touch = Math.min(4, parseInt(c.touch||1) + 1);
-      }
-      if (selTags.includes('Not Now')) c.followup = new Date(Date.now() + 30*86400000).toISOString().split('T')[0];
-      c._score = calcScore(c, [log, ...logs]);
-      await DB.put('contacts', c);
-      contacts = await DB.getAll('contacts');
+  const note=document.getElementById('lgNote').value.trim();
+  if(!logContactId&&!document.getElementById('lgSearch').value.trim()){toast('Please select a contact first');return;}
+  if(!note){toast('Please add a note');return;}
+  const h=getHora();
+  const log={id:U.id(),contactId:logContactId,contact:logContactName||document.getElementById('lgSearch').value,date:U.today(),time:U.now(),dayOfWeek:U.dayOfWeek(),hora:h.current.name,channel:selChannel,tags:[...selTags],note,next:document.getElementById('lgNext').value,followup:document.getElementById('lgDate').value,created:new Date().toISOString()};
+  await DB.put('logs',log);
+  GS.addToQueue('append',SHEETS.logs,[log.id,log.contactId,log.contact,log.date,log.time,log.dayOfWeek,log.hora,log.channel,log.tags.join(','),log.note,log.next,log.followup,'']);
+  if(logContactId){
+    const c=contacts.find(x=>x.id===logContactId);
+    if(c){
+      if(log.followup) c.followup=log.followup;
+      if(selTags.includes('Interested')||selTags.includes('Meeting Booked')) c.touch=String(Math.min(4,parseInt(c.touch||1)+1));
+      if(selTags.includes('Not Now')) c.followup=new Date(Date.now()+30*86400000).toISOString().split('T')[0];
+      await DB.put('contacts',c);
+      contacts=await DB.getAll('contacts');
     }
   }
   logs.unshift(log);
-  // Reset form
-  ['lgSearch','lgNote','lgNext','lgDate'].forEach(id => document.getElementById(id).value = '');
-  logContactId = null; logContactName = ''; selTags = [];
-  document.querySelectorAll('.tag-btn').forEach(b => { b.style.background=''; b.style.color=''; });
-  renderLogs(); toast('✅ Logged · Score updated');
+  ['lgSearch','lgNote','lgNext','lgDate'].forEach(id=>document.getElementById(id).value='');
+  logContactId=null; logContactName=''; selTags=[];
+  document.querySelectorAll('.tag-btn').forEach(b=>{b.style.background='';b.style.color='';});
+  document.querySelectorAll('.ch-btn').forEach(b=>{b.style.background='';b.style.color='';});
+  document.querySelector('.ch-btn').style.background='#1B3A5C';
+  document.querySelector('.ch-btn').style.color='white';
+  selChannel='WhatsApp';
+  renderLogs(); renderContacts();
+  toast('✅ Logged · Score updated · Hora recorded: '+h.current.name);
 }
 
 function renderLogs() {
-  const el = document.getElementById('logList'); if (!el) return;
-  const all = logs.sort((a,b) => new Date(b.created||b.date) - new Date(a.created||a.date)).slice(0,25);
-  if (!all.length) { el.innerHTML = '<div class="empty" style="padding:20px;"><div class="empty-i">📝</div><div class="empty-t">No interactions yet.</div></div>'; return; }
-  el.innerHTML = all.map(l =>
-    `<div class="log-item">
-      <div class="log-d">${U.fmt(l.date)} · ${l.time||''} · ${l.channel||''} ${l.hora?'· '+l.hora+' hora':''}</div>
-      <div class="log-c">${l.contact}</div>
-      <div class="log-n">${l.note}</div>
-      ${(l.tags||[]).length?`<div style="margin-top:4px;">${l.tags.map(t=>`<span style="background:var(--bg3);padding:2px 7px;border-radius:10px;font-size:11px;color:var(--ink3);margin-right:4px;">${t}</span>`).join('')}</div>`:''}
-      ${l.next?`<div class="log-x">→ ${l.next}${l.followup?' · by '+U.fmt(l.followup):''}</div>`:''}
-    </div>`
+  const el=document.getElementById('logList'); if(!el) return;
+  const all=logs.sort((a,b)=>new Date(b.created||b.date)-new Date(a.created||a.date)).slice(0,25);
+  if(!all.length){el.innerHTML='<div style="padding:20px;text-align:center;color:#8A7A70;font-size:13px;">No interactions yet. Log your first one above.</div>';return;}
+  el.innerHTML=all.map(l=>
+    '<div style="padding:12px;border-bottom:1px solid rgba(26,20,16,0.08);">'+
+      '<div style="font-size:11px;color:#8A7A70;margin-bottom:3px;">'+U.fmt(l.date)+' · '+(l.time||'')+' · '+(l.channel||'')+(l.hora?' · '+l.hora+' hora':'')+'</div>'+
+      '<div style="font-size:14px;font-weight:700;color:#1B3A5C;margin-bottom:2px;">'+l.contact+'</div>'+
+      '<div style="font-size:13px;color:#3A2E28;line-height:1.5;">'+(l.note||'')+'</div>'+
+      ((l.tags||[]).length?'<div style="margin-top:4px;">'+(l.tags||[]).map(t=>'<span style="background:#F2EBE0;padding:2px 7px;border-radius:10px;font-size:11px;color:#8A7A70;margin-right:4px;">'+t+'</span>').join('')+'</div>':'')+
+      (l.next?'<div style="font-size:12px;color:#5A8A62;font-weight:600;margin-top:4px;">→ '+l.next+(l.followup?' · by '+U.fmt(l.followup):'')+'</div>':'')+
+    '</div>'
   ).join('');
 }
 
 function renderPipeline() {
-  const scored = contacts.map(c => ({ ...c, _score: calcScore(c, logs) }));
-  document.getElementById('pipeStats').innerHTML = `
-    <div class="stat"><div class="sv">${contacts.filter(c=>c.status!=='client').length}</div><div class="sl">Prospects</div></div>
-    <div class="stat"><div class="sv">${contacts.filter(c=>c.status==='client').length}</div><div class="sl">Clients</div></div>
-    <div class="stat"><div class="sv">${contacts.filter(c=>c.status==='hot').length}</div><div class="sl">Hot</div></div>
-    <div class="stat"><div class="sv">${Math.round(contacts.reduce((s,c)=>s+(parseFloat(c.premium)||0),0)/1000)}k</div><div class="sl">Pipeline AED</div></div>`;
-  const stages = [
-    { key:'hot',label:'🔴 Hot — Ready to Close' }, { key:'warm',label:'🟡 Warm — In Conversation' },
-    { key:'proposal',label:'📄 Proposal Sent' },    { key:'cold',label:'🔵 Cold — To Warm Up' },
-    { key:'client',label:'✅ Active Clients' },      { key:'referral',label:'🌟 Referral Sources' }
-  ];
-  document.getElementById('pipeView').innerHTML = stages.map(s => {
-    const items = scored.filter(c => c.status === s.key);
-    if (!items.length) return '';
-    return `<div class="card" style="padding:14px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-        <div style="font-size:15px;font-weight:700;color:var(--navy);">${s.label}</div>
-        <span class="badge b-blue">${items.length}</span>
-      </div>
-      ${items.sort((a,b)=>b._score-a._score).map(c=>`
-        <div style="background:var(--bg3);border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">
-          <div>
-            <div style="font-size:14px;font-weight:600;color:var(--ink);">${c.name}</div>
-            <div style="font-size:12px;color:var(--ink3);">${c.company||''} · Score ${c._score}</div>
-          </div>
-          <div style="display:flex;gap:6px;align-items:center;">
-            ${c.premium?`<span style="font-size:12px;color:var(--green);font-weight:700;">AED ${Number(c.premium).toLocaleString()}</span>`:''}
-            ${c.phone?`<a href="${U.waLink(c.phone,U.touchMsg(c))}" target="_blank" style="background:var(--wa);color:white;border-radius:8px;padding:5px 8px;font-size:12px;font-weight:700;text-decoration:none;">💬</a>`:''}
-          </div>
-        </div>`).join('')}
-    </div>`;
-  }).join('') || '<div class="empty"><div class="empty-i">📊</div><div class="empty-t">Add contacts to see your pipeline.</div></div>';
+  const scored=contacts.map(c=>({...c,_score:calcScore(c,logs)}));
+  document.getElementById('pipeStats').innerHTML=
+    '<div class="stat"><div class="sv">'+contacts.filter(c=>c.status!=='client').length+'</div><div class="sl">Prospects</div></div>'+
+    '<div class="stat"><div class="sv">'+contacts.filter(c=>c.status==='client').length+'</div><div class="sl">Clients</div></div>'+
+    '<div class="stat"><div class="sv">'+contacts.filter(c=>c.status==='hot').length+'</div><div class="sl">Hot</div></div>'+
+    '<div class="stat"><div class="sv">'+Math.round(contacts.reduce((s,c)=>s+(parseFloat(c.premium)||0),0)/1000)+'k</div><div class="sl">Pipeline AED</div></div>';
+  const stages=[{key:'hot',label:'🔴 Hot — Ready to Close'},{key:'warm',label:'🟡 Warm — In Conversation'},{key:'proposal',label:'📄 Proposal Sent'},{key:'cold',label:'🔵 Cold — To Warm Up'},{key:'client',label:'✅ Active Clients'},{key:'referral',label:'🌟 Referral Sources'}];
+  document.getElementById('pipeView').innerHTML=stages.map(s=>{
+    const items=scored.filter(c=>c.status===s.key);
+    if(!items.length) return '';
+    return '<div class="card" style="padding:14px;">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'+
+        '<div style="font-size:15px;font-weight:700;color:#1B3A5C;">'+s.label+'</div>'+
+        '<span class="badge b-blue">'+items.length+'</span>'+
+      '</div>'+
+      items.sort((a,b)=>b._score-a._score).map(c=>
+        '<div style="background:#F2EBE0;border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">'+
+          '<div><div style="font-size:14px;font-weight:600;color:#1A1410;">'+c.name+'</div>'+
+          '<div style="font-size:12px;color:#8A7A70;">'+(c.company||'')+' · Score '+c._score+'</div></div>'+
+          '<div style="display:flex;gap:6px;align-items:center;">'+
+            (c.premium?'<span style="font-size:12px;color:#2E7D52;font-weight:700;">AED '+Number(c.premium).toLocaleString()+'</span>':'')+
+            (c.phone?'<a href="'+U.waLink(c.phone,U.touchMsg(c))+'" target="_blank" style="background:#25D366;color:white;border-radius:8px;padding:5px 9px;font-size:12px;font-weight:700;text-decoration:none;">💬</a>':'')+
+          '</div>'+
+        '</div>'
+      ).join('')+
+    '</div>';
+  }).join('')||'<div class="empty"><div class="empty-i">📊</div><div class="empty-t">Add contacts to see your pipeline.</div></div>';
 }
 
 async function saveContact() {
-  const name = document.getElementById('aN').value.trim();
-  if (!name) { toast('Please enter a name'); return; }
-  const phone = U.phone(document.getElementById('aPh').value);
-  // Duplicate check
-  const dup = contacts.find(c =>
-    (phone && c.phone === phone) ||
-    c.name.toLowerCase() === name.toLowerCase()
-  );
-  if (dup) {
-    if (!confirm(`Similar contact found: ${dup.name} (${dup.company||'no company'}). Add anyway?`)) return;
-  }
-  const prods = [];
-  if (document.getElementById('pLife').checked) prods.push('life');
-  if (document.getElementById('pInv').checked)  prods.push('invest');
-  if (document.getElementById('pSav').checked)  prods.push('savings');
-  if (document.getElementById('pSme').checked)  prods.push('sme');
-  if (document.getElementById('pGrp').checked)  prods.push('group');
-  if (document.getElementById('pTak').checked)  prods.push('takaful');
-
-  const nat = document.getElementById('aNat').value;
-  const rel = document.getElementById('aRel').value;
-  const c = {
-    id: U.id(), name, phone, whatsapp: document.getElementById('aWa').value || phone,
-    email: document.getElementById('aEm').value, company: document.getElementById('aCo').value,
-    jobTitle: document.getElementById('aJt').value, industry: document.getElementById('aIn').value,
-    nationality: nat, religion: rel,
-    yearsUAE: document.getElementById('aYrs').value, ageBand: document.getElementById('aAge').value,
-    incomeBand: document.getElementById('aInc').value,
-    dependantsUAE: document.getElementById('aDep').value || '0',
-    dependantsHome: document.getElementById('aDepH').value || '0',
-    employmentType: document.getElementById('aEmpType').value,
-    status: document.getElementById('aSt').value, source: document.getElementById('aSrc').value,
-    referredBy: document.getElementById('aRefBy').value,
-    products: prods, premium: document.getElementById('aPrem').value,
-    followup: document.getElementById('aFu').value, linkedIn: document.getElementById('aLi').value,
-    notes: document.getElementById('aNote').value,
-    touch: '1', dateAdded: U.today(), created: new Date().toISOString(),
-    nriFlag: ['Indian','Pakistani','Bangladeshi','Sri Lankan','Nepali'].includes(nat),
-    smeFlag: ['owner','selfemployed'].includes(document.getElementById('aEmpType').value),
-    takafulFlag: ['Muslim'].includes(rel) || ['Pakistani','Bangladeshi','Egyptian'].includes(nat),
-    active: 'Yes'
-  };
-  await DB.put('contacts', c);
-  GS.addToQueue('append', SHEETS.contacts, [c.id,c.name,c.phone,c.whatsapp,c.email,c.company,c.jobTitle,c.industry,c.nationality,c.religion,c.yearsUAE,c.ageBand,c.maritalStatus||'',c.dependantsUAE,c.dependantsHome,c.incomeBand,c.employmentType,c.source,c.referredBy,c.products.join(','),'',c.status,c.touch,calcScore(c,[]),c.premium,c.followup,U.today(),'','Yes',c.notes,c.dateAdded,'',c.nriFlag?'Yes':'',c.smeFlag?'Yes':'',c.takafulFlag?'Yes':'',c.linkedIn,'']);
-  contacts = await DB.getAll('contacts');
-  // Reset form
-  ['aN','aPh','aWa','aEm','aCo','aJt','aPrem','aFu','aLi','aRefBy','aNote'].forEach(id => document.getElementById(id).value = '');
-  ['pLife','pInv','pSav','pSme','pGrp','pTak'].forEach(id => document.getElementById(id).checked = false);
-  toast('✅ Contact saved! Score: ' + calcScore(c,[]));
-  renderContacts();
-  // Switch to contacts tab
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('tab-contacts').classList.add('active');
-  document.querySelectorAll('.tab')[0].classList.add('active');
+  const name=document.getElementById('aN').value.trim();
+  if(!name){toast('Please enter a name');return;}
+  const phone=U.phone(document.getElementById('aPh').value);
+  const dup=contacts.find(c=>(phone&&c.phone===phone)||c.name.toLowerCase()===name.toLowerCase());
+  if(dup&&!confirm('Similar contact found: '+dup.name+'. Add anyway?')) return;
+  const prods=[];
+  if(document.getElementById('pLife').checked) prods.push('life');
+  if(document.getElementById('pInv').checked)  prods.push('invest');
+  if(document.getElementById('pSav').checked)  prods.push('savings');
+  if(document.getElementById('pSme').checked)  prods.push('sme');
+  if(document.getElementById('pGrp').checked)  prods.push('group');
+  if(document.getElementById('pTak').checked)  prods.push('takaful');
+  const nat=document.getElementById('aNat').value;
+  const rel=document.getElementById('aRel').value;
+  const empType=document.getElementById('aEmpType').value;
+  const c={id:U.id(),name,phone,whatsapp:document.getElementById('aWa').value||phone,email:document.getElementById('aEm').value,company:document.getElementById('aCo').value,jobTitle:document.getElementById('aJt').value,industry:document.getElementById('aIn').value,nationality:nat,religion:rel,yearsUAE:document.getElementById('aYrs').value,ageBand:document.getElementById('aAge').value,incomeBand:document.getElementById('aInc').value,dependantsUAE:document.getElementById('aDep').value||'0',dependantsHome:document.getElementById('aDepH').value||'0',employmentType:empType,status:document.getElementById('aSt').value,source:document.getElementById('aSrc').value,referredBy:document.getElementById('aRefBy').value,products:prods,premium:document.getElementById('aPrem').value,followup:document.getElementById('aFu').value,linkedIn:document.getElementById('aLi').value,notes:document.getElementById('aNote').value,touch:'1',dateAdded:U.today(),created:new Date().toISOString(),nriFlag:['Indian','Pakistani','Bangladeshi','Sri Lankan','Nepali'].includes(nat),smeFlag:['owner','selfemployed'].includes(empType),takafulFlag:rel==='Muslim'||['Pakistani','Bangladeshi','Egyptian'].includes(nat),active:'Yes'};
+  await DB.put('contacts',c);
+  GS.addToQueue('append',SHEETS.contacts,[c.id,c.name,c.phone,c.whatsapp,c.email,c.company,c.jobTitle,c.industry,c.nationality,c.religion,c.yearsUAE,c.ageBand,'',c.dependantsUAE,c.dependantsHome,c.incomeBand,c.employmentType,c.source,c.referredBy,c.products.join(','),'',c.status,c.touch,calcScore(c,[]),c.premium,c.followup,U.today(),'','Yes',c.notes,c.dateAdded,'',c.nriFlag?'Yes':'',c.smeFlag?'Yes':'',c.takafulFlag?'Yes':'',c.linkedIn,'']);
+  contacts=await DB.getAll('contacts');
+  ['aN','aPh','aWa','aEm','aCo','aJt','aPrem','aFu','aLi','aRefBy','aNote'].forEach(id=>document.getElementById(id).value='');
+  ['pLife','pInv','pSav','pSme','pGrp','pTak'].forEach(id=>document.getElementById(id).checked=false);
+  toast('✅ Contact saved! Score: '+calcScore(c,[]));
+  swTab('contacts',document.querySelectorAll('.tab')[0]);
 }
 
-function cycleStatus(id) {
-  const c = contacts.find(x=>x.id===id); if(!c) return;
-  const ss = ['cold','warm','hot','proposal','client','referral'];
-  c.status = ss[(ss.indexOf(c.status||'cold')+1)%ss.length];
-  DB.put('contacts',c).then(() => { contacts = contacts.map(x=>x.id===id?c:x); renderContacts(); toast('Status → '+c.status); });
+function cycleStatus(id){
+  const c=contacts.find(x=>x.id===id); if(!c) return;
+  const ss=['cold','warm','hot','proposal','client','referral'];
+  c.status=ss[(ss.indexOf(c.status||'cold')+1)%ss.length];
+  DB.put('contacts',c).then(()=>{contacts=contacts.map(x=>x.id===id?c:x);renderContacts();toast('Status → '+c.status);});
 }
 
-async function deleteContact(id) {
-  await DB.delete('contacts', id);
-  contacts = contacts.filter(c=>c.id!==id);
+async function deleteContact(id){
+  await DB.delete('contacts',id);
+  contacts=contacts.filter(c=>c.id!==id);
   renderContacts(); toast('Contact deleted');
 }
 
 async function importFile() {
-  const file = document.getElementById('impFile').files[0];
-  if (!file) { toast('Please select a file'); return; }
-  const res = document.getElementById('impResult');
-  res.innerHTML = '<div style="font-size:13px;color:var(--ink3);">Analysing file...</div>';
-  const text = await file.text();
-  let added = 0, skipped = 0, flagged = 0;
-  const isVCard = text.includes('BEGIN:VCARD');
-  if (isVCard) {
-    const vcards = text.split('BEGIN:VCARD').filter(v=>v.trim());
-    for (const vcard of vcards) {
-      const get = (key) => { const m = vcard.match(new RegExp(key+'[^:]*:(.+)')); return m?m[1].trim():''; };
-      const fn  = get('FN') || (get('N').split(';').slice(0,2).reverse().join(' ').trim());
-      if (!fn) continue;
-      const phone = U.phone(get('TEL'));
-      if (contacts.find(c=>c.name.toLowerCase()===fn.toLowerCase()||(phone&&c.phone===phone))) { skipped++; continue; }
-      const nat = phone.startsWith('+91')?'Indian':phone.startsWith('+63')?'Filipino':phone.startsWith('+27')?'South African':phone.startsWith('+44')?'British':'';
-      const c = { id:U.id(),name:fn,phone,email:get('EMAIL'),company:get('ORG'),jobTitle:get('TITLE'),nationality:nat,status:'cold',source:'Imported',products:[],touch:'1',dateAdded:U.today(),created:new Date().toISOString(),nriFlag:nat==='Indian',smeFlag:false,takafulFlag:['Pakistani','Bangladeshi','Egyptian'].includes(nat),active:'Yes',notes:get('NOTE') };
+  const file=(document.getElementById('impFile')||{files:[]}).files[0];
+  if(!file){toast('Please select a file');return;}
+  const res=document.getElementById('impResult');
+  res.innerHTML='<div style="font-size:13px;color:#8A7A70;padding:10px 0;">Analysing file...</div>';
+  const text=await file.text();
+  let added=0,skipped=0;
+  const isVCard=text.includes('BEGIN:VCARD');
+  if(isVCard){
+    const vcards=text.split('BEGIN:VCARD').filter(v=>v.trim());
+    for(const vcard of vcards){
+      const get=key=>{const m=vcard.match(new RegExp(key+'[^:]*:(.+)'));return m?m[1].trim():'';};
+      const fn=get('FN')||(get('N').split(';').slice(0,2).reverse().join(' ').trim());
+      if(!fn) continue;
+      const phone=U.phone(get('TEL'));
+      if(contacts.find(c=>c.name.toLowerCase()===fn.toLowerCase()||(phone&&c.phone===phone))){skipped++;continue;}
+      const nat=phone.startsWith('+91')?'Indian':phone.startsWith('+63')?'Filipino':phone.startsWith('+27')?'South African':phone.startsWith('+44')?'British':'';
+      const c={id:U.id(),name:fn,phone,email:get('EMAIL'),company:get('ORG'),jobTitle:get('TITLE'),nationality:nat,status:'cold',source:'Imported',products:[],touch:'1',dateAdded:U.today(),created:new Date().toISOString(),nriFlag:nat==='Indian',smeFlag:false,takafulFlag:['Pakistani','Bangladeshi','Egyptian'].includes(nat),active:'Yes',notes:get('NOTE')};
       await DB.put('contacts',c); added++;
     }
   } else {
-    const lines = text.split('\n').filter(l=>l.trim());
-    if (lines.length < 2) { res.innerHTML='<div style="color:var(--rose);">File appears empty or unreadable.</div>'; return; }
-    const headers = lines[0].split(',').map(h=>h.trim().toLowerCase().replace(/"/g,''));
-    const map = {
-      name:    ['name','full name','contact','person'],
-      first:   ['first name','given name','fname','first'],
-      last:    ['last name','family name','surname','lname','last'],
-      phone:   ['phone','mobile','cell','tel','whatsapp','phone 1 - value','contact no'],
-      email:   ['email','e-mail','email address','email 1 - value','e-mail address'],
-      company: ['company','organization','organisation','employer','firm','organization name'],
-      title:   ['title','position','job title','designation','role'],
-      notes:   ['notes','comments','remarks']
-    };
-    const idx = {};
-    Object.entries(map).forEach(([field, aliases]) => {
-      idx[field] = headers.findIndex(h => aliases.some(a => h.includes(a)));
-    });
-    const g = (row, field) => { const i = idx[field]; return i >= 0 ? (row[i]||'').replace(/"/g,'').trim() : ''; };
-    for (const line of lines.slice(1)) {
-      const row  = line.split(',');
-      let name   = g(row,'name') || ([g(row,'first'),g(row,'last')].filter(Boolean).join(' '));
-      if (!name) { flagged++; continue; }
-      const phone = U.phone(g(row,'phone'));
-      if (contacts.find(c=>c.name.toLowerCase()===name.toLowerCase()||(phone&&c.phone===phone))) { skipped++; continue; }
-      const nat = phone.startsWith('+91')?'Indian':phone.startsWith('+63')?'Filipino':phone.startsWith('+27')?'South African':phone.startsWith('+44')?'British':'';
-      const co  = g(row,'company'); const jt = g(row,'title');
-      const smeFl = ['owner','founder','ceo','managing director','gm','partner'].some(k=>(jt||'').toLowerCase().includes(k));
-      const hrFl  = ['hr manager','hr director','head of hr','chro','people'].some(k=>(jt||'').toLowerCase().includes(k));
-      const c = { id:U.id(),name,phone,email:g(row,'email'),company:co,jobTitle:jt,nationality:nat,status:'cold',source:'Imported',products:smeFl||hrFl?['sme']:[],touch:'1',dateAdded:U.today(),created:new Date().toISOString(),nriFlag:nat==='Indian',smeFlag:smeFl||hrFl,takafulFlag:['Pakistani','Bangladeshi','Egyptian'].includes(nat),active:'Yes',notes:g(row,'notes') };
+    const lines=text.split('\n').filter(l=>l.trim());
+    if(lines.length<2){res.innerHTML='<div style="color:#B84040;">File appears empty.</div>';return;}
+    const headers=lines[0].split(',').map(h=>h.trim().toLowerCase().replace(/"/g,''));
+    const map={name:['name','full name'],first:['first name','given name','fname','first'],last:['last name','family name','surname','lname','last'],phone:['phone','mobile','cell','tel','whatsapp','phone 1 - value','contact no'],email:['email','e-mail','email address','email 1 - value'],company:['company','organization','organisation','employer','organization name'],title:['title','position','job title','designation']};
+    const idx={};
+    Object.entries(map).forEach(([field,aliases])=>{idx[field]=headers.findIndex(h=>aliases.some(a=>h.includes(a)));});
+    const g=(row,field)=>{const i=idx[field];return i>=0?(row[i]||'').replace(/"/g,'').trim():'';};
+    for(const line of lines.slice(1)){
+      const row=line.split(',');
+      let name=g(row,'name')||([g(row,'first'),g(row,'last')].filter(Boolean).join(' '));
+      if(!name) continue;
+      const phone=U.phone(g(row,'phone'));
+      if(contacts.find(c=>c.name.toLowerCase()===name.toLowerCase()||(phone&&c.phone===phone))){skipped++;continue;}
+      const nat=phone.startsWith('+91')?'Indian':phone.startsWith('+63')?'Filipino':phone.startsWith('+27')?'South African':phone.startsWith('+44')?'British':'';
+      const co=g(row,'company'); const jt=g(row,'title');
+      const smeFl=['owner','founder','ceo','managing director','gm','partner'].some(k=>(jt||'').toLowerCase().includes(k));
+      const c={id:U.id(),name,phone,email:g(row,'email'),company:co,jobTitle:jt,nationality:nat,status:'cold',source:'Imported',products:smeFl?['sme']:[],touch:'1',dateAdded:U.today(),created:new Date().toISOString(),nriFlag:nat==='Indian',smeFlag:smeFl,takafulFlag:['Pakistani','Bangladeshi','Egyptian'].includes(nat),active:'Yes',notes:''};
       await DB.put('contacts',c); added++;
     }
   }
-  contacts = await DB.getAll('contacts');
-  res.innerHTML = `<div style="background:var(--bg3);border-radius:10px;padding:14px;">
-    <div style="font-size:14px;font-weight:700;color:var(--green);margin-bottom:6px;">✅ Import Complete</div>
-    <div style="font-size:13px;color:var(--ink2);line-height:1.8;">
-      Added: <strong>${added}</strong> new contacts<br>
-      Skipped: <strong>${skipped}</strong> duplicates<br>
-      ${flagged?`Flagged: <strong>${flagged}</strong> rows (no name found)<br>`:''}
-    </div>
-    <button onclick="swTab('contacts',document.querySelectorAll('.tab')[0])" class="btn btn-p btn-sm" style="margin-top:10px;">View Contacts</button>
-  </div>`;
+  contacts=await DB.getAll('contacts');
+  res.innerHTML='<div style="background:#F2EBE0;border-radius:10px;padding:14px;">'+
+    '<div style="font-size:14px;font-weight:700;color:#2E7D52;margin-bottom:6px;">✅ Import Complete</div>'+
+    '<div style="font-size:13px;color:#3A2E28;line-height:1.8;">Added: <strong>'+added+'</strong> new contacts<br>Skipped: <strong>'+skipped+'</strong> duplicates</div>'+
+    '<button onclick="swTab(\'contacts\',document.querySelectorAll(\'.tab\')[0])" style="background:#1B3A5C;color:white;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;margin-top:10px;font-family:Nunito,sans-serif;">View Contacts</button>'+
+  '</div>';
   renderContacts();
 }
 
-function smartPaste() {
-  const text = document.getElementById('pasteBox').value.trim();
-  if (!text) { toast('Please paste some contact information'); return; }
-  const lines = text.split('\n').map(l=>l.trim()).filter(Boolean);
-  const extracted = { name:'', phone:'', email:'', company:'', title:'' };
-  const phoneRx = /(\+?[\d\s\-\(\)]{8,})/g;
-  const emailRx = /[\w.-]+@[\w.-]+\.\w+/;
-  for (const line of lines) {
-    const ph = line.match(/(\+971|00971|05\d|04\d)[\d\s\-]{7,}/);
-    if (ph && !extracted.phone) extracted.phone = U.phone(ph[0]);
-    const em = line.match(emailRx);
-    if (em && !extracted.email) extracted.email = em[0];
-    if (!extracted.name && line.length < 40 && !line.includes('@') && !line.match(/\d{5,}/)) {
-      const titleWords = ['manager','director','ceo','officer','advisor','engineer','doctor','nurse','head','president'];
-      if (!titleWords.some(w=>line.toLowerCase().includes(w))) extracted.name = line;
-      else if (!extracted.title) extracted.title = line;
+function smartPaste(){
+  const text=document.getElementById('pasteBox').value.trim();
+  if(!text){toast('Please paste some contact information');return;}
+  const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
+  const extracted={name:'',phone:'',email:'',company:'',title:''};
+  const emailRx=/[\w.-]+@[\w.-]+\.\w+/;
+  for(const line of lines){
+    const ph=line.match(/(\+971|00971|05\d|04\d)[\d\s\-]{6,}/);
+    if(ph&&!extracted.phone) extracted.phone=U.phone(ph[0]);
+    const em=line.match(emailRx);
+    if(em&&!extracted.email) extracted.email=em[0];
+    if(!extracted.name&&line.length<50&&!line.includes('@')&&!line.match(/\d{5,}/)){
+      const titleWords=['manager','director','ceo','officer','advisor','engineer','doctor','nurse','head'];
+      if(!titleWords.some(w=>line.toLowerCase().includes(w))) extracted.name=line;
+      else if(!extracted.title) extracted.title=line;
     }
-    if (!extracted.company && (line.includes('LLC')||line.includes('Ltd')||line.includes('Inc')||line.includes('Co.')||line.includes('Group')||line.includes('Bank')||line.includes('Insurance'))) extracted.company = line;
+    if(!extracted.company&&(line.includes('LLC')||line.includes('Ltd')||line.includes('Inc')||line.includes('Group')||line.includes('Bank')||line.includes('Insurance')||line.includes('Hospital'))) extracted.company=line;
   }
-  document.getElementById('pasteResult').innerHTML = `<div style="background:var(--bg3);border-radius:10px;padding:14px;margin-top:8px;">
-    <div style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:8px;">Extracted — review and edit</div>
-    ${Object.entries(extracted).filter(([k,v])=>v).map(([k,v])=>`<div style="font-size:13px;color:var(--ink2);margin-bottom:4px;"><strong>${k}:</strong> ${v}</div>`).join('')}
-    <button onclick="fillAddForm(${JSON.stringify(extracted).replace(/</g,'&lt;')})" class="btn btn-p btn-sm" style="margin-top:10px;">Fill Add Contact Form</button>
-  </div>`;
+  document.getElementById('pasteResult').innerHTML='<div style="background:#F2EBE0;border-radius:10px;padding:14px;margin-top:8px;">'+
+    '<div style="font-size:13px;font-weight:700;color:#1B3A5C;margin-bottom:8px;">Extracted — review below</div>'+
+    Object.entries(extracted).filter(([k,v])=>v).map(([k,v])=>'<div style="font-size:13px;color:#3A2E28;margin-bottom:4px;"><strong>'+k+':</strong> '+v+'</div>').join('')+
+    '<button onclick="fillAddForm('+JSON.stringify(extracted).replace(/</g,'&lt;')+')" style="background:#1B3A5C;color:white;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;margin-top:10px;font-family:Nunito,sans-serif;">Fill Add Contact Form →</button>'+
+  '</div>';
 }
 
-function fillAddForm(data) {
-  if (data.name)    document.getElementById('aN').value  = data.name;
-  if (data.phone)   document.getElementById('aPh').value = data.phone;
-  if (data.email)   document.getElementById('aEm').value = data.email;
-  if (data.company) document.getElementById('aCo').value = data.company;
-  if (data.title)   document.getElementById('aJt').value = data.title;
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('tab-add').classList.add('active');
-  document.querySelectorAll('.tab')[3].classList.add('active');
+function fillAddForm(data){
+  if(data.name)    document.getElementById('aN').value=data.name;
+  if(data.phone)   document.getElementById('aPh').value=data.phone;
+  if(data.email)   document.getElementById('aEm').value=data.email;
+  if(data.company) document.getElementById('aCo').value=data.company;
+  if(data.title)   document.getElementById('aJt').value=data.title;
+  swTab('add',document.querySelectorAll('.tab')[3]);
   toast('Form filled — review and save');
 }
 
-async function restoreBackup() {
-  try {
-    const data = JSON.parse(document.getElementById('restoreBox').value.trim());
-    if (data.contacts) { for (const c of data.contacts) await DB.put('contacts',c); }
-    if (data.logs)     { for (const l of data.logs)     await DB.put('logs',l); }
-    contacts = await DB.getAll('contacts');
-    logs     = await DB.getAll('logs');
+async function restoreBackup(){
+  try{
+    const data=JSON.parse(document.getElementById('restoreBox').value.trim());
+    if(data.contacts){for(const c of data.contacts) await DB.put('contacts',c);}
+    if(data.logs){for(const l of data.logs) await DB.put('logs',l);}
+    contacts=await DB.getAll('contacts'); logs=await DB.getAll('logs');
     renderContacts(); renderLogs(); renderPipeline();
     toast('✅ Data restored!');
-  } catch(e) { toast('❌ Invalid backup data'); }
+  }catch(e){toast('❌ Invalid backup data');}
 }
 
-function openMod(html) { document.getElementById('mBody').innerHTML = html; document.getElementById('mOv').classList.add('open'); }
-function closeMod()    { document.getElementById('mOv').classList.remove('open'); }
-document.getElementById('mOv').addEventListener('click', e => { if(e.target===document.getElementById('mOv')) closeMod(); });
-function toast(msg,dur=2500) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),dur); }
+function openMod(html){document.getElementById('mBody').innerHTML=html;document.getElementById('mOv').classList.add('open');}
+function closeMod(){document.getElementById('mOv').classList.remove('open');}
+document.getElementById('mOv').addEventListener('click',e=>{if(e.target===document.getElementById('mOv'))closeMod();});
+function toast(msg,dur=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
 
 init();
 </script>
