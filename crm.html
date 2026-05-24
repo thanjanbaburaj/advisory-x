@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>BR Business · CRM</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -278,9 +278,10 @@
   <button class="nb" onclick="location.href='calculators.html'"><span class="ni">🧮</span>Calculate</button>
   <button class="nb" onclick="location.href='leads.html'"><span class="ni">🎯</span>Leads</button>
 </nav>
-<script src="config.js"></script>
+<script src="logout.js"></script>
 <script src="sheets.js"></script>
-<script>
+<script>loadConfig(function(){});
+
 let contacts=[], logs=[], statusFilter='', selChannel='WhatsApp', selTags=[], logContactId=null, logContactName='';
 
 async function init() {

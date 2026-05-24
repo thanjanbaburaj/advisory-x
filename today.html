@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>BR Business · Today</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <style>
 .client-search-results{background:white;border:1.5px solid rgba(26,20,16,0.12);border-top:none;border-radius:0 0 12px 12px;max-height:200px;overflow-y:auto;position:absolute;left:0;right:0;z-index:50;}
@@ -183,8 +183,10 @@
   <button class="nb" onclick="comingSoon('Leads')"><span class="ni">🎯</span>Leads</button>
 </nav>
 
-<script src="config.js"></script>
+<script src="logout.js"></script>
 <script src="sheets.js"></script>
+<script>loadConfig(function(){ init(); });</script>
+<script>
 <script>
 
 let contacts=[], logs=[], policies=[], currentMode='business', selectedClient=null;
@@ -593,7 +595,7 @@ function closeMod(){document.getElementById('mOv').classList.remove('open');}
 document.getElementById('mOv').addEventListener('click',e=>{if(e.target===document.getElementById('mOv'))closeMod();});
 function toast(msg,dur=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
 
-init();
+// init() called by loadConfig above
 </script>
 </body>
 </html>
