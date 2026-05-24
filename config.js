@@ -7,8 +7,8 @@ const BR_CONFIG = {
 
   VERSION:   '1.1',           // increment when you make changes
 
-  SHEET_ID:  'YOUR_GOOGLE_SHEET_ID_HERE',   // ★ LINE 1
-  CLIENT_ID: 'YOUR_GOOGLE_CLIENT_ID_HERE',   // ★ LINE 2
+  SHEET_ID:  '1g59Rq4tz9ochU5_9qQNfGhOJ13XUaLqSLzPLFyVz7mo',   // ★ LINE 1
+  CLIENT_ID: '973273003983-3uki430667q7ujjqts70b051q48fbude.apps.googleusercontent.com',   // ★ LINE 2
   PIN:       '9617',                          // ★ LINE 3 — your PIN
 
   NAME:        'Babu Raj',
