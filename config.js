@@ -20,9 +20,9 @@
 
 const BR_CONFIG = {
 
-  SHEET_ID:  'YOUR_GOOGLE_SHEET_ID_HERE',   // ★ LINE 1
-  CLIENT_ID: 'YOUR_GOOGLE_CLIENT_ID_HERE',   // ★ LINE 2
-  PIN:       '1234',                          // ★ LINE 3
+  SHEET_ID:  '1g59Rq4tz9ochU5_9qQNfGhOJ13XUaLqSLzPLFyVz7mo',   // ★ LINE 1
+  CLIENT_ID: 'http://973273003983-3uki430667q7ujjqts70b051q48fbude.apps.googleusercontent.com',   // ★ LINE 2
+  PIN:       '9617',                          // ★ LINE 3
 
   NAME:        'Babu Raj',
   PHONE:       '+971569102951',
