@@ -183,10 +183,10 @@
   <button class="nb" onclick="comingSoon('Leads')"><span class="ni">🎯</span>Leads</button>
 </nav>
 
-<script src="logout.js"></script>
+
+<script src="config.js?ts=1748000000"></script>
 <script src="sheets.js"></script>
-<script>loadConfig(function(){ init(); });</script>
-<script>
+<script src="logout.js"></script>
 <script>
 
 let contacts=[], logs=[], policies=[], currentMode='business', selectedClient=null;
@@ -595,7 +595,8 @@ function closeMod(){document.getElementById('mOv').classList.remove('open');}
 document.getElementById('mOv').addEventListener('click',e=>{if(e.target===document.getElementById('mOv'))closeMod();});
 function toast(msg,dur=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
 
-// init() called by loadConfig above
+
+init();
 </script>
 </body>
 </html>
