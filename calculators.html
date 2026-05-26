@@ -80,7 +80,7 @@
 <div id="panel-quick" class="panel active">
   <div class="fna-hero">
     <div style="font-size:11px;opacity:0.6;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;margin-bottom:4px;">Quick FNA — 5 Minutes</div>
-    <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:4px;">Is there a gap worth addressing?</div>
+    <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:4px;">Is there a picture worth completing?</div>
     <div style="font-size:13px;opacity:0.75;line-height:1.6;">Six questions. Instant result. Use this in first meetings, referral introductions, or over the phone to qualify the need and book the detailed review.</div>
   </div>
 
@@ -545,7 +545,7 @@ function calcQuick(){
     '</div>'+
     '<div style="background:var(--off);border-radius:10px;padding:12px 14px;margin-top:10px;border:1px solid var(--border);">'+
       '<div style="font-size:12px;font-weight:800;color:var(--navy);margin-bottom:6px;">NEXT STEP</div>'+
-      '<div style="font-size:13px;color:var(--ink2);line-height:1.6;margin-bottom:10px;">"Based on these numbers, '+cname+' — there appears to be a gap worth addressing properly. I\'d like to do a full 20-minute Financial Needs Analysis with you to give you an exact picture. When works for you this week?"</div>'+
+      '<div style="font-size:13px;color:var(--ink2);line-height:1.6;margin-bottom:10px;">"Based on these numbers, '+cname+' — there appears to be a picture worth completing properly. I\'d like to do a full 20-minute Financial Needs Analysis with you to give you an exact picture. When works for you this week?"</div>'+
       '<button onclick="swFnaTab(\'detail\',document.querySelectorAll(\'.tab\')[1])" class="btn btn-p btn-full">Open Detailed FNA →</button>'+
     '</div>';
 }
@@ -805,7 +805,7 @@ function generateProposal(){
       '<div style="font-size:12px;opacity:0.9;font-style:italic;">"Does this level of protection feel right for your family?"</div>'+
     '</div>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap;">'+
-      (selectedC&&selectedC.phone?'<a href="'+U.waLink(selectedC.phone,'Dear '+cname+',\n\nHere is a summary of your Financial Needs Analysis completed today.\n\nTotal protection gap: AED '+Math.round(total).toLocaleString()+'\n\nI will send the full report shortly.\n\n— Babu Raj\nCert CII | AIA/CII UK | AIA/LIMRA USA')+'" target="_blank" class="btn btn-wa">💬 WhatsApp Summary</a>':'')+
+      (selectedC&&selectedC.phone?'<a href="'+U.waLink(selectedC.phone,'Dear '+cname+',\n\nHere is a summary of your Financial Needs Analysis completed today.\n\nTotal protection gap: AED '+Math.round(total).toLocaleString()+'\n\nI will send the full report shortly.\n\n— Babu Raj\nCert CII · AIA/CII UK · AIA/LIMRA USA')+'" target="_blank" class="btn btn-wa">💬 WhatsApp Summary</a>':'')+
       '<button onclick="saveToContact('+Math.round(total)+')" class="btn btn-p">💾 Save to Record</button>'+
     '</div>';
   document.getElementById('proposalOutput').scrollIntoView({behavior:'smooth'});

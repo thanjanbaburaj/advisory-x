@@ -641,9 +641,7 @@ function togTag(el, tagId) {
     var note = document.getElementById('lgNote');
     if (note) {
       var current = note.value.trim();
-      note.value = current ? current + '
-
-' + el.dataset.note : el.dataset.note;
+      note.value = current ? current + '\n\n' + el.dataset.note : el.dataset.note;
     }
   }
   selTags = Array.from(document.querySelectorAll('.tag-btn.active-tag')).map(function(b) { return b.textContent.trim(); });
@@ -684,11 +682,6 @@ function saveReferral() {
     ['refName','refPhone','refEmail','refNotes'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
     renderContacts();
   });
-} else {
-    selTags.push(tag);
-    el.style.background = 'var(--navy)';
-    el.style.color      = 'white';
-  }
 }
 
 async function saveLog() {
@@ -703,8 +696,8 @@ async function saveLog() {
     hora: h.current.name, channel: selChannel,
     outcome: (document.getElementById('lgOutcome')||{value:''}).value,
     tags: selTags.slice(), note: note,
-    next: document.getElementById('lgNext').value,
-    followup: document.getElementById('lgDate').value,
+    next: document.getElementById('lgNextAction').value,
+    followup: document.getElementById('lgFollowup').value,
     created: new Date().toISOString()
   };
   await DB.put('logs', log);
@@ -728,8 +721,8 @@ async function saveLog() {
   // Reset form
   document.getElementById('lgSearch').value = '';
   document.getElementById('lgNote').value   = '';
-  document.getElementById('lgNext').value   = '';
-  document.getElementById('lgDate').value   = '';
+  document.getElementById('lgNextAction').value   = '';
+  document.getElementById('lgFollowup').value   = '';
   logContactId = null; logContactName = '';
   selTags = [];
   document.querySelectorAll('.tag-btn').forEach(function(b) { b.style.background = ''; b.style.color = ''; });
@@ -739,7 +732,7 @@ async function saveLog() {
 }
 
 function renderLogs() {
-  var el = document.getElementById('logList');
+  var el = document.getElementById('logsList');
   if (!el) return;
   var sorted = logs.slice().sort(function(a,b) { return new Date(b.created||b.date) - new Date(a.created||a.date); }).slice(0, 25);
   if (!sorted.length) {
