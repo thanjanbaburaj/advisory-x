@@ -14,8 +14,8 @@ var BR_CONFIG = {
   },
 
   // Google Sheets
-  SHEET_ID:  'YOUR_GOOGLE_SHEET_ID_HERE',
-  CLIENT_ID: 'YOUR_GOOGLE_CLIENT_ID_HERE',
+  SHEET_ID:  '1g59Rq4tz9ochU5_9qQNfGhOJ13XUaLqSLzPLFyVz7mo',
+  CLIENT_ID: 'http://973273003983-3uki430667q7ujjqts70b051q48fbude.apps.googleusercontent.com',
   SCOPES:    'https://www.googleapis.com/auth/spreadsheets',
 
   VERSION: '2.1.0',
