@@ -1,64 +1,167 @@
-// ═══════════════════════════════════════════════════════════
-// BR BUSINESS SYSTEM — SETTINGS
-// Edit the 3 lines marked ★ then upload to GitHub
-// ═══════════════════════════════════════════════════════════
+// ── BR BUSINESS CONFIG ─────────────────────────────────────
+// Edit these values before uploading to GitHub
 
-const BR_CONFIG = {
+var BR_CONFIG = {
 
-  VERSION:   '1.1',           // increment when you make changes
+  PIN: '9617',
 
-  SHEET_ID:  'YOUR_GOOGLE_SHEET_ID_HERE',   // ★ LINE 1
-  CLIENT_ID: 'YOUR_GOOGLE_CLIENT_ID_HERE',   // ★ LINE 2
-  PIN:       '9617',                          // ★ LINE 3 — your PIN
+  ADVISOR: {
+    name:   'Babu Raj',
+    creds:  'Cert CII · AIA/CII UK · AIA/LIMRA USA',
+    phone:  '+971569102951',
+    email:  'thanjanbaburaj@gmail.com',
+    wa:     '971569102951'
+  },
 
-  NAME:        'Babu Raj',
-  PHONE:       '+971569102951',
-  EMAIL:       'thanjanbaburaj@gmail.com',
-  DESIGNATION: 'Insurance & Financial Advisor',
-  CREDENTIALS: 'Cert CII 99% · AIA/CII UK · AIA/LIMRA USA',
+  // Google Sheets
+  SHEET_ID:  'YOUR_GOOGLE_SHEET_ID_HERE',
+  CLIENT_ID: 'YOUR_GOOGLE_CLIENT_ID_HERE',
+  SCOPES:    'https://www.googleapis.com/auth/spreadsheets',
 
-  TARGETS: { contacts:15, meetings:5, proposals:3, closings:1, referrals:3 },
+  VERSION: '2.1.0',
 
   COMMISSION: {
-    life_initial:15, life_renewal:8,
-    investment_initial:2, investment_trail:0.75,
-    group_medical:10, group_life:12, liability:15
+    life_new:       40,
+    life_renewal:   5,
+    investment_new: 30,
+    sme_new:        15,
+    pa_new:         25
   },
 
+  // ── MESSAGE TEMPLATES ─────────────────────────────────────
+  // {firstName} = first name only (e.g. "Roshan" not "Roshan Thayyil")
+  // {name}      = full name
+  // {company}   = company name
   MESSAGES: {
-    touch1:          "Hi {name}, hope you and the family are well. Was thinking about you today — how have things been? Are you still at {company}?",
-    touch2:          "Hi {name}, saw this and thought of you — did you know most UAE expats are underinsured for their actual salary? Happy to share what I found out if you're curious.",
-    touch3:          "Hi {name}, I've been doing complimentary financial health checks for a few people lately — no obligation, no pressure, just a 20-minute conversation to map out whether there are any gaps. Would you be open to that?",
-    post_meeting:    "Hi {name}, thank you so much for your time today. I really enjoyed our conversation. I'll send you the details we discussed — if any questions come to mind before then, just reply here or call me anytime.",
-    renewal_30:      "Hi {name}, your {product} with {insurer} renews in about 4 weeks. I'd like to do a quick review before then — 20 minutes, I can come to you or we do it on a call. When works?",
-    renewal_14:      "Hi {name}, just following up — your {product} renews in 2 weeks. Shall we do a quick review this week?",
-    renewal_7:       "Hi {name}, your {product} renewal is next week. I want to make sure this is sorted for you. Can we confirm the renewal today?",
-    referral:        "I work almost entirely through referrals. Is there one person in your life — a colleague, a friend — who you think would benefit from this conversation? Just one name.",
-    proposal_follow: "Hi {name}, following up on the proposal I shared — happy to go through any part of it again. When suits you?",
-    annual_review:   "Hi {name}, it's been a year since we put your plan in place — I'd love to do a quick annual review. 20 minutes. When works this week?",
-    birthday:        "Hi {name}, wishing you a very happy birthday! Hope you have a wonderful day with your family. 🎂",
-    claim_follow:    "Hi {name}, just checking in to make sure the claim process is going smoothly. Please don't hesitate to call me directly — I'm here to help."
+    touch1:
+      'Hi {firstName}, hope you and the family are well. ' +
+      'Was thinking about you today — how have things been? ' +
+      'Are you still at {company}?',
+
+    touch2:
+      'Hi {firstName}, saw this and thought of you — ' +
+      'did you know most UAE expats are significantly underinsured ' +
+      'for their actual salary? Happy to share what I found out ' +
+      'if you\'re curious.',
+
+    touch3:
+      'Hi {firstName}, I\'ve been doing complimentary family ' +
+      'protection reviews for a few people lately — no obligation, ' +
+      'no pressure, just a 20-minute conversation to map out ' +
+      'whether there are any gaps. Would you be open to that?',
+
+    post_meeting:
+      'Hi {firstName}, great speaking with you today. ' +
+      'I\'ll prepare the full Family Protection Review report ' +
+      'and send it across shortly. Any questions in the meantime ' +
+      '— just message me here.',
+
+    // ── OCCASION MESSAGES ────────────────────────────────────
+    eid:
+      'Eid Mubarak, {firstName}! 🌙✨\n' +
+      'Wishing you and your family a blessed and joyful Eid. ' +
+      'May this occasion bring peace, happiness, and prosperity ' +
+      'to you and your loved ones.\n\n' +
+      '— Babu Raj',
+
+    diwali:
+      'Happy Diwali, {firstName}! 🪔✨\n' +
+      'Wishing you and your family a year filled with light, ' +
+      'joy, and abundance. May this festival bring you ' +
+      'everything you wish for.\n\n' +
+      '— Babu Raj',
+
+    christmas:
+      'Merry Christmas, {firstName}! 🎄✨\n' +
+      'Wishing you and your family a wonderful Christmas filled ' +
+      'with love, warmth, and joy.\n\n' +
+      '— Babu Raj',
+
+    onam:
+      'Happy Onam, {firstName}! 🌸✨\n' +
+      'Wishing you and your family a joyful and prosperous ' +
+      'Onam celebration. Onashamsakal!\n\n' +
+      '— Babu Raj',
+
+    gurpurab:
+      'Waheguru Ji Ka Khalsa, Waheguru Ji Ki Fateh!\n' +
+      'Happy Gurpurab, {firstName}! 🙏✨\n' +
+      'Wishing you and your family a blessed celebration.\n\n' +
+      '— Babu Raj',
+
+    birthday:
+      'Happy Birthday, {firstName}! 🎂🎉\n' +
+      'Wishing you a wonderful day and a year filled with ' +
+      'joy, good health, and everything you\'ve worked towards.\n\n' +
+      '— Babu Raj'
   },
 
-  SCORING: {
-    has_dependants:10, uae_3plus_years:8, age_30_to_50:7, industry_bonus:5,
-    contact_last_7_days:15, contact_last_30_days:8, followup_date_set:8,
-    two_plus_interactions:5, status_hot:15, status_warm:8,
-    premium_entered:7, products_tagged:5, referred_by_client:8,
-    no_contact_90_days:-10, cold_no_followup:-8, no_phone_or_email:-5
-  },
+  // ── PIPELINE STAGES ───────────────────────────────────────
+  STAGES: [
+    { id: 'prospect',  label: 'Prospect',  colour: '#E6EEFF' },
+    { id: 'touched',   label: 'Touched',   colour: '#FEF3E6' },
+    { id: 'engaged',   label: 'Engaged',   colour: '#FFF3CD' },
+    { id: 'meeting',   label: 'Meeting',   colour: '#E6F0FF' },
+    { id: 'proposal',  label: 'Proposal',  colour: '#F0E6FF' },
+    { id: 'decision',  label: 'Decision',  colour: '#FDEAEA' },
+    { id: 'client',    label: 'Won ✓',     colour: '#E6F4EC' },
+    { id: 'nurture',   label: 'Nurture',   colour: '#F5F5F5' }
+  ],
 
-  PROVIDERS: {
-    investment: ['Zurich International','Friends Provident / Evelyn Partners','Generali Worldwide','RL360','Investors Trust','MetLife International','LIC International','SunLife','Old Mutual International','Standard Life International','Quilter International','AXA Wealth','HDFC International','Lombard International','Utmost International'],
-    life:       ['Zurich','AXA','MetLife','LIC International','Friends Provident','SunLife','Takaful Emarat','Al Hilal Takaful','Noor Takaful','Old Mutual International','Standard Life'],
-    group_medical: ['Daman','Sukoon','QIC','AXA','Neuron','ADNIC','Takaful Emarat','Noor Takaful','MSH International','NextCare'],
-    group_life:    ['Zurich','AXA','MetLife','Oman Insurance','ADNIC','Takaful Emarat'],
-    general:       ['Jumbo','AXA','RSA','Oman Insurance','ADNIC']
-  }
-};
+  // ── INTERACTION OUTCOMES ──────────────────────────────────
+  OUTCOMES: [
+    { id: 'positive',     label: '✅ Positive — follow-up agreed' },
+    { id: 'later',        label: '📅 Requested later — date set' },
+    { id: 'no_answer',    label: '📵 No answer — try again' },
+    { id: 'not_interested',label: '❌ Not interested — move to Nurture' },
+    { id: 'referred',     label: '🔄 Referred someone' },
+    { id: 'fna_discussed',label: '📋 FNA / Protection Review discussed' },
+    { id: 'proposal_sent',label: '💼 Proposal sent' },
+    { id: 'application',  label: '✍️ Application started' },
+    { id: 'concern',      label: '⚠️ Concern raised — needs follow-up' }
+  ],
 
-const SHEETS = {
-  contacts:'CONTACTS', policies:'POLICIES', investments:'INVESTMENTS',
-  logs:'LOGS', fna:'FNA', sme:'SME', commission:'COMMISSION',
-  goals:'GOALS', partners:'PARTNERS', workshops:'WORKSHOPS'
+  // ── QUICK LOG TAGS ────────────────────────────────────────
+  LOG_TAGS: [
+    {
+      id: 'family',
+      label: '👨‍👩‍👧 Family mentioned',
+      note: 'Client mentioned family situation: [edit here]'
+    },
+    {
+      id: 'income_change',
+      label: '💰 Income change',
+      note: 'Client indicated income has changed. Review FNA: [edit here]'
+    },
+    {
+      id: 'objection',
+      label: '🚧 Objection raised',
+      note: 'Objection: [Premium / Spouse / Timing / Already covered / Other]\nResponse given: [edit here]'
+    },
+    {
+      id: 'fna',
+      label: '📊 Protection gaps discussed',
+      note: 'Gaps discussed: Life ☐  CI ☐  Disability ☐  Emergency ☐  Education ☐  Retirement ☐\nClient response: [edit here]'
+    },
+    {
+      id: 'referred',
+      label: '🤝 Referred someone',
+      note: 'Referral received from this contact. New contact added.'
+    },
+    {
+      id: 'meeting_scheduled',
+      label: '📅 Meeting scheduled',
+      note: 'Meeting confirmed for: [date/time]. Location: [edit here]'
+    },
+    {
+      id: 'policy_concern',
+      label: '📋 Policy concern',
+      note: 'Client raised concern about existing policy: [edit here]\nAction required: [edit here]'
+    },
+    {
+      id: 'birthday',
+      label: '🎂 Birthday / Occasion',
+      note: 'Wished [occasion]. Client response: [edit here]'
+    }
+  ]
 };
