@@ -355,6 +355,14 @@ Action required: [edit here]">📋 Policy concern</button>
   <button class="nb" onclick="comingSoon('Leads')"><span class="ni">🎯</span>Leads</button>
 </nav>
 
+<script>
+var SHEETS = {
+  contacts: 'Contacts',
+  logs:     'Interactions',
+  policies: 'Policies',
+  fna:      'FNA'
+};
+</script>
 <script src="config.js"></script>
 <script src="sheets.js"></script>
 <script src="logout.js"></script>
@@ -427,7 +435,7 @@ function sendOccasionBatch(occasion) {
     var link = U.waLink(c.phone, msg);
     html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">' +
       '<div style="font-size:13px;font-weight:700;">' + c.name + '</div>' +
-      '<a href="' + link + '" target="_blank" style="background:var(--wa);color:white;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;text-decoration:none;" onclick="logOccasion(''+c.id+'',''+occasion+'')">💬 Send</a>' +
+      '<a href="' + link + '" target="_blank" style="background:var(--wa);color:white;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;text-decoration:none;" onclick="logOccasion(\'' + c.id + '\',\'' + occasion + '\')">💬 Send</a>' +
     '</div>';
   });
   html += '</div>';
