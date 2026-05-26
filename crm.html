@@ -47,6 +47,8 @@
       <button class="btn btn-sm" style="background:#E6EEFF;color:#1A3A7A;border:1.5px solid #B0C4F0;" onclick="fSt('cold')">🔵 Cold</button>
       <button class="btn btn-sm" style="background:#E6F4EC;color:#1A6B3C;border:1.5px solid #A0D4B0;" onclick="fSt('client')">✅ Clients</button>
       <button class="btn btn-sm" style="background:#F0E6FF;color:#4A1A7A;border:1.5px solid #C8A0F0;" onclick="fSt('proposal')">📄 Proposal</button>
+      <button class="btn btn-sm" style="background:#FFF3CD;color:#7A4A00;border:1.5px solid #F5D580;" onclick="fSt('eid')">🌙 Eid</button>
+      <button class="btn btn-sm" style="background:var(--wa);color:white;border:none;" onclick="sendOccasionBatch('eid')" title="Send Eid Mubarak to all Muslim contacts">📤 Send Eid</button>
     </div>
     <div class="fg">
       <select class="fs" id="sortBy" onchange="renderContacts()" style="font-size:14px;padding:10px 14px;">
@@ -76,13 +78,18 @@
   <div class="panel" id="tab-log">
     <div class="card">
       <div class="card-t">Log Interaction</div>
+
+      <!-- CONTACT SEARCH -->
       <div class="fg">
-        <label class="fl">Contact — type to search</label>
+        <label class="fl">Contact</label>
         <div style="position:relative;">
-          <input class="fi" id="lgSearch" placeholder="Type name..." oninput="searchForLog()" autocomplete="off">
+          <input class="fi" id="lgSearch" placeholder="Type name to search..." oninput="searchForLog()" autocomplete="off">
           <div id="lgResults" style="display:none;position:absolute;left:0;right:0;background:white;border:1.5px solid var(--border);border-top:none;border-radius:0 0 12px 12px;max-height:200px;overflow-y:auto;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,0.1);"></div>
         </div>
+        <div id="lgSelectedContact" style="display:none;margin-top:6px;padding:8px 12px;background:var(--off);border-radius:8px;border:1px solid var(--border);font-size:13px;font-weight:700;color:var(--navy);"></div>
       </div>
+
+      <!-- CHANNEL -->
       <div class="fg">
         <label class="fl">Channel</label>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -92,36 +99,84 @@
           <button class="btn btn-sm btn-o ch-btn" data-ch="Email" onclick="selCh(this)">📧 Email</button>
         </div>
       </div>
+
+      <!-- OUTCOME (required) -->
       <div class="fg">
-        <label class="fl">Quick Tags</label>
+        <label class="fl">Outcome <span style="color:var(--coral);font-size:10px;">required</span></label>
+        <select class="fs" id="lgOutcome" style="border-color:var(--border);" onchange="onOutcomeChange()">
+          <option value="">— Select outcome —</option>
+          <option value="positive">✅ Positive — follow-up agreed</option>
+          <option value="later">📅 Requested later — date set</option>
+          <option value="no_answer">📵 No answer — try again</option>
+          <option value="not_interested">❌ Not interested</option>
+          <option value="referred">🔄 Referred someone</option>
+          <option value="fna_discussed">📋 Protection review discussed</option>
+          <option value="proposal_sent">💼 Proposal sent</option>
+          <option value="application">✍️ Application started</option>
+          <option value="concern">⚠️ Concern raised</option>
+        </select>
+      </div>
+
+      <!-- REFERRAL QUICK-ADD (shows when outcome = referred) -->
+      <div id="referralPanel" style="display:none;background:var(--green2);border-radius:12px;padding:14px;margin-bottom:14px;border:1.5px solid #A0D4B0;">
+        <div style="font-size:12px;font-weight:800;color:var(--green);margin-bottom:10px;">🤝 Add Referral Contact</div>
+        <div class="fg"><label class="fl">Name</label><input class="fi" id="refName" placeholder="Referral's name"></div>
+        <div class="fr2">
+          <div class="fg"><label class="fl">Mobile</label><input class="fi" id="refPhone" placeholder="+971..." type="tel"></div>
+          <div class="fg"><label class="fl">Email</label><input class="fi" id="refEmail" placeholder="email" type="email"></div>
+        </div>
+        <div class="fg"><label class="fl">Notes</label><input class="fi" id="refNotes" placeholder="How do they know each other?"></div>
+        <button class="btn btn-p btn-sm" onclick="saveReferral()" style="margin-top:4px;">+ Add as New Contact</button>
+      </div>
+
+      <!-- QUICK TAGS -->
+      <div class="fg">
+        <label class="fl">Quick Tags <span style="font-size:10px;font-weight:500;text-transform:none;color:var(--ink3);">— tap to add pre-written notes</span></label>
         <div style="display:flex;gap:6px;flex-wrap:wrap;" id="tagBtns">
-          <button class="btn btn-xs btn-o tag-btn" onclick="togTag(this)">Interested</button>
-          <button class="btn btn-xs btn-o tag-btn" onclick="togTag(this)">Not Now</button>
-          <button class="btn btn-xs btn-o tag-btn" onclick="togTag(this)">Needs FNA</button>
-          <button class="btn btn-xs btn-o tag-btn" onclick="togTag(this)">Referred Someone</button>
-          <button class="btn btn-xs btn-o tag-btn" onclick="togTag(this)">Objection Raised</button>
-          <button class="btn btn-xs btn-o tag-btn" onclick="togTag(this)">Proposal Discussed</button>
-          <button class="btn btn-xs btn-o tag-btn" onclick="togTag(this)">Meeting Booked</button>
+          <button class="btn btn-xs btn-o tag-btn" onclick="togTag(this,'family')" data-note="Client mentioned family situation: [edit here]">👨‍👩‍👧 Family</button>
+          <button class="btn btn-xs btn-o tag-btn" onclick="togTag(this,'objection')" data-note="Objection raised: [Premium too high / Needs spouse / Timing / Other]
+Response given: [edit here]">🚧 Objection</button>
+          <button class="btn btn-xs btn-o tag-btn" onclick="togTag(this,'fna')" data-note="Protection gaps discussed:
+Life ☐  CI ☐  Disability ☐  Emergency ☐  Education ☐  Retirement ☐
+Client response: [edit here]">📊 FNA discussed</button>
+          <button class="btn btn-xs btn-o tag-btn" onclick="togTag(this,'income_change')" data-note="Client indicated income has changed. Review FNA figures: [edit here]">💰 Income change</button>
+          <button class="btn btn-xs btn-o tag-btn" onclick="togTag(this,'meeting_scheduled')" data-note="Meeting confirmed for: [date/time]. Location: [edit here]">📅 Meeting set</button>
+          <button class="btn btn-xs btn-o tag-btn" onclick="togTag(this,'policy_concern')" data-note="Policy concern raised: [edit here]
+Action required: [edit here]">📋 Policy concern</button>
+          <button class="btn btn-xs btn-o tag-btn" onclick="togTag(this,'birthday')" data-note="Occasion message sent. Client response: [edit here]">🎂 Occasion</button>
+          <button class="btn btn-xs btn-o tag-btn" onclick="togTag(this,'interested')" data-note="Client expressed interest. Next: [edit here]">⭐ Interested</button>
         </div>
       </div>
+
+      <!-- NOTE (pre-populated from tags) -->
       <div class="fg">
-        <label class="fl">Note</label>
-        <input class="fi" id="lgNote" placeholder="Key point from the conversation...">
+        <label class="fl">Notes</label>
+        <textarea class="fi" id="lgNote" rows="4" placeholder="Key points from the conversation..." style="resize:none;line-height:1.6;"></textarea>
       </div>
+
+      <!-- NEXT ACTION -->
       <div class="fg">
         <label class="fl">Next Action</label>
-        <input class="fi" id="lgNext" placeholder="What happens next?">
+        <div class="fr2">
+          <select class="fs" id="lgNextAction">
+            <option value="Follow-up call">📞 Follow-up call</option>
+            <option value="Send WhatsApp">💬 Send WhatsApp</option>
+            <option value="Book FNA meeting">📊 Book FNA meeting</option>
+            <option value="Send proposal">💼 Send proposal</option>
+            <option value="Wait for decision">⏳ Wait for decision</option>
+            <option value="Annual review">🔄 Annual review</option>
+            <option value="No action needed">✓ No action needed</option>
+          </select>
+          <input class="fi" id="lgFollowup" type="date" style="font-size:13px;">
+        </div>
       </div>
-      <div class="fg">
-        <label class="fl">Follow-up Date</label>
-        <input type="date" class="fi" id="lgDate">
-      </div>
-      <button class="btn btn-p btn-full" onclick="saveLog()" style="margin-top:4px;">Save · Updates score instantly</button>
+
+      <button class="btn btn-p btn-full" onclick="saveLog()" style="margin-top:4px;">Save Interaction · Updates Score & Pipeline</button>
     </div>
+
+    <!-- RECENT LOGS -->
     <div class="st">Recent Interactions</div>
-    <div class="card" style="padding:0;overflow:hidden;">
-      <div id="logList"></div>
-    </div>
+    <div id="logsList"></div>
   </div>
 
   <!-- ADD PANEL -->
@@ -344,12 +399,64 @@ function swTab(id, el) {
 
 function fSt(s) { statusFilter = s; renderContacts(); }
 
+function daysBadge(contactId) {
+  var cLogs = logs.filter(function(l) { return l.contactId === contactId; });
+  if (!cLogs.length) return '<span style="font-size:10px;color:var(--ink4);font-weight:600;padding:2px 7px;border-radius:8px;background:var(--off);margin-left:6px;">New</span>';
+  var last = cLogs.sort(function(a,b) { return b.created > a.created ? 1 : -1; })[0];
+  var days = Math.floor((Date.now() - new Date(last.created)) / 86400000);
+  var col = days < 7 ? '#0D6B3A' : days < 14 ? '#B5610A' : '#C04444';
+  var bg  = days < 7 ? '#E6F4EC' : days < 14 ? '#FEF3E6' : '#FEF0F0';
+  return '<span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:8px;background:'+bg+';color:'+col+';margin-left:6px;">'+days+'d</span>';
+}
+
+function sendOccasionBatch(occasion) {
+  var tpl = BR_CONFIG.MESSAGES[occasion];
+  if (!tpl) { toast('No template for ' + occasion); return; }
+  var targets = contacts.filter(function(c) {
+    if (occasion === 'eid')      return (c.religion||'').toLowerCase() === 'muslim' && c.phone;
+    if (occasion === 'diwali')   return (c.religion||'').toLowerCase() === 'hindu'  && c.phone;
+    if (occasion === 'christmas')return (c.religion||'').toLowerCase() === 'christian' && c.phone;
+    return c.phone;
+  });
+  if (!targets.length) { toast('No matching contacts with phone numbers'); return; }
+  if (!confirm('Send ' + occasion.charAt(0).toUpperCase() + occasion.slice(1) + ' message to ' + targets.length + ' contacts?')) return;
+  var html = '<div style="padding:4px 0;">' +
+    '<div style="font-size:15px;font-weight:800;color:var(--navy);margin-bottom:12px;">📤 ' + occasion.charAt(0).toUpperCase()+occasion.slice(1) + ' Messages — ' + targets.length + ' contacts</div>';
+  targets.forEach(function(c) {
+    var msg = U.msg(tpl, c);
+    var link = U.waLink(c.phone, msg);
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">' +
+      '<div style="font-size:13px;font-weight:700;">' + c.name + '</div>' +
+      '<a href="' + link + '" target="_blank" style="background:var(--wa);color:white;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;text-decoration:none;" onclick="logOccasion(''+c.id+'',''+occasion+'')">💬 Send</a>' +
+    '</div>';
+  });
+  html += '</div>';
+  openMod(html);
+}
+
+function logOccasion(contactId, occasion) {
+  var c = contacts.find(function(x){ return x.id === contactId; });
+  if (!c) return;
+  var h = getHora ? getHora() : {current:{name:''}};
+  var entry = {id:U.id(), contactId:contactId, contact:c.name,
+    date:U.today(), time:U.now(), dayOfWeek:U.dayOfWeek(),
+    hora:h.current.name, channel:'WhatsApp',
+    tags:[occasion.charAt(0).toUpperCase()+occasion.slice(1)],
+    outcome:'positive',
+    note:occasion.charAt(0).toUpperCase()+occasion.slice(1)+' message sent.',
+    next:'Follow up in 2 days', followup:'', created:new Date().toISOString()};
+  DB.put('logs', entry).then(function() {
+    logs.push(entry);
+  });
+}
+
 function renderContacts() {
   var search = (document.getElementById('csInp') || {value:''}).value.toLowerCase();
   var sortBy = (document.getElementById('sortBy') || {value:'score'}).value;
   var filtered = contacts.filter(function(c) {
     var ms  = !search || [c.name, c.company, c.phone, c.email].some(function(f) { return (f||'').toLowerCase().indexOf(search) > -1; });
-    var mst = !statusFilter || c.status === statusFilter;
+    var mst = !statusFilter || c.status === statusFilter ||
+               (statusFilter === 'eid' && (c.religion || '').toLowerCase() === 'muslim');
     return ms && mst;
   }).map(function(c) { return Object.assign({}, c, {_score: calcScore(c, logs)}); });
 
@@ -398,7 +505,10 @@ function renderContacts() {
     return '<div class="cc">' +
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">' +
         '<div style="flex:1;">' +
-          '<div class="cc-name">' + c.name + '</div>' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+        '<div class="cc-name">' + c.name + '</div>' +
+        daysBadge(c.id) +
+        '</div>' +
           '<div class="cc-sub">' + (c.company||'') + (c.jobTitle ? ' · ' + c.jobTitle : '') + '</div>' +
           '<div style="font-size:11px;color:var(--ink4);margin-top:3px;font-weight:600;">' + (c.nationality||'') + (c.nationality && lastContact ? ' · ' : '') + lastContact + '</div>' +
         '</div>' +
@@ -502,9 +612,12 @@ function searchForLog() {
 function selLogContact(id, name) {
   logContactId   = id;
   logContactName = name;
-  document.getElementById('lgSearch').value  = name;
-  document.getElementById('lgResults').style.display = 'none';
-  document.getElementById('lgNote').focus();
+  var inp = document.getElementById('lgSearch');
+  if (inp) inp.value = name;
+  var res = document.getElementById('lgResults');
+  if (res) res.style.display = 'none';
+  var badge = document.getElementById('lgSelectedContact');
+  if (badge) { badge.style.display = 'block'; badge.textContent = '✓ ' + name; }
 }
 
 function selCh(el) {
@@ -518,14 +631,60 @@ function selCh(el) {
   selChannel = el.dataset.ch;
 }
 
-function togTag(el) {
+function togTag(el, tagId) {
   var tag = el.textContent.trim();
-  var idx = selTags.indexOf(tag);
-  if (idx > -1) {
-    selTags.splice(idx, 1);
-    el.style.background = '';
-    el.style.color      = '';
-  } else {
+  var isActive = el.classList.toggle('active-tag');
+  el.style.background = isActive ? 'var(--navy)' : '';
+  el.style.color      = isActive ? 'white' : '';
+  // Pre-populate note from data-note attribute
+  if (isActive && el.dataset.note) {
+    var note = document.getElementById('lgNote');
+    if (note) {
+      var current = note.value.trim();
+      note.value = current ? current + '
+
+' + el.dataset.note : el.dataset.note;
+    }
+  }
+  selTags = Array.from(document.querySelectorAll('.tag-btn.active-tag')).map(function(b) { return b.textContent.trim(); });
+}
+
+function onOutcomeChange() {
+  var outcome = (document.getElementById('lgOutcome')||{value:''}).value;
+  var refPanel = document.getElementById('referralPanel');
+  if (refPanel) refPanel.style.display = outcome === 'referred' ? 'block' : 'none';
+  var nextMap = {
+    positive:'Follow-up call', later:'Follow-up call',
+    no_answer:'Send WhatsApp', not_interested:'No action needed',
+    referred:'Follow-up call', fna_discussed:'Book FNA meeting',
+    proposal_sent:'Wait for decision', application:'Wait for decision',
+    concern:'Follow-up call'
+  };
+  if (nextMap[outcome]) {
+    var sel = document.getElementById('lgNextAction');
+    if (sel) { for (var i=0;i<sel.options.length;i++) { if (sel.options[i].value===nextMap[outcome]){sel.selectedIndex=i;break;} } }
+  }
+}
+
+function saveReferral() {
+  var name  = (document.getElementById('refName')||{value:''}).value.trim();
+  var phone = U.phone((document.getElementById('refPhone')||{value:''}).value);
+  var email = (document.getElementById('refEmail')||{value:''}).value.trim();
+  var notes = (document.getElementById('refNotes')||{value:''}).value.trim();
+  if (!name) { toast('Please enter referral name'); return; }
+  var nc = {id:U.id(),name:name,phone:phone,email:email,
+    status:'warm',source:'Referral',referredBy:logContactName||'',
+    notes:'Referred by '+(logContactName||'')+(notes?'. '+notes:''),
+    products:[],touch:'1',dateAdded:U.today(),
+    created:new Date().toISOString(),nriFlag:false,smeFlag:false,
+    takafulFlag:false,active:'Yes',nationality:'',religion:''};
+  DB.put('contacts',nc).then(function(){
+    contacts.push(nc);
+    toast('✅ '+name+' added as referral contact');
+    ['refName','refPhone','refEmail','refNotes'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+    renderContacts();
+  });
+} else {
     selTags.push(tag);
     el.style.background = 'var(--navy)';
     el.style.color      = 'white';
@@ -542,6 +701,7 @@ async function saveLog() {
     contact: logContactName, date: U.today(),
     time: U.now(), dayOfWeek: U.dayOfWeek(),
     hora: h.current.name, channel: selChannel,
+    outcome: (document.getElementById('lgOutcome')||{value:''}).value,
     tags: selTags.slice(), note: note,
     next: document.getElementById('lgNext').value,
     followup: document.getElementById('lgDate').value,
