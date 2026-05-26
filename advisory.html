@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Babu Raj · Family Protection Review</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   DESIGN SYSTEM
+   Jupiter Gold + Saturn Navy
+   Vedic / Jyotish aligned palette
+   ═══════════════════════════════════════ */
+:root{
+  --navy:   #0B1E35; /* Saturn: structure, discipline, longevity */
+  --navy2:  #162D4A;
+  --navy3:  #1E3A5F;
+  --gold:   #C9893A; /* Jupiter: wisdom, abundance, protection */
+  --gold2:  #E8B86A; /* Sun: authority, vitality */
+  --gold3:  #F5E6C8;
+  --green:  #0D6B3A; /* Mercury: intelligence, good decisions */
+  --green2: #E6F4EE;
+  --amber:  #B5610A; /* Mars: action required, urgency */
+  --amber2: #FEF3E6;
+  --coral:  #C04444; /* attention, not panic */
+  --coral2: #FEF0F0;
+  --white:  #FFFFFF;
+  --cream:  #FDFAF5; /* Moon: peace, clarity */
+  --slate:  #F2F4F7;
+  --ink:    #0A0A0A;
+  --ink2:   #222222;
+  --ink3:   #666666;
+  --ink4:   #999999;
+  --border: rgba(10,10,10,0.1);
+  --shadow: 0 4px 24px rgba(0,0,0,0.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{scroll-behavior:smooth;}
+body{font-family:'Inter',sans-serif;background:var(--slate);color:var(--ink);-webkit-font-smoothing:antialiased;}
+
+/* SCREENS */
+.scr{display:none;min-height:100vh;flex-direction:column;animation:fd .35s ease;}
+.scr.active{display:flex;}
+@keyframes fd{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+/* ADVISOR BAR */
+.abar{background:var(--navy);padding:13px 20px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+.aname{font-size:13px;font-weight:800;color:var(--gold2);letter-spacing:.04em;}
+.acreds{font-size:10px;color:rgba(255,255,255,.4);font-weight:600;letter-spacing:.06em;}
+
+/* PROGRESS */
+.pwrap{background:rgba(255,255,255,.08);height:3px;flex-shrink:0;}
+.pfill{height:100%;background:var(--gold2);transition:width .5s ease;}
+
+/* CONTENT */
+.cnt{flex:1;overflow-y:auto;padding:24px 18px 48px;max-width:500px;width:100%;margin:0 auto;}
+.cnt.ctr{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
+
+/* CARDS */
+.card{background:var(--white);border-radius:20px;border:1px solid var(--border);box-shadow:var(--shadow);padding:22px;margin-bottom:14px;}
+.cdark{background:var(--navy);border-radius:20px;padding:26px;margin-bottom:14px;color:var(--white);position:relative;overflow:hidden;}
+.cdark::before{content:'';position:absolute;top:-60px;right:-60px;width:180px;height:180px;background:rgba(255,255,255,.03);border-radius:50%;}
+.cgold{background:linear-gradient(135deg,var(--gold),#A0661A);border-radius:16px;padding:20px;margin-bottom:12px;color:var(--white);}
+
+/* TYPE */
+.D{font-family:'Playfair Display',serif;font-size:27px;font-weight:900;line-height:1.2;letter-spacing:-.5px;}
+.D2{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;line-height:1.3;}
+.D3{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;}
+.LB{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--ink3);}
+.LBg{color:rgba(255,255,255,.5);}
+.body{font-size:15px;line-height:1.7;color:var(--ink2);}
+.sm{font-size:13px;line-height:1.65;color:var(--ink3);}
+
+/* PROTECTION SCORE RING */
+.ring-wrap{position:relative;width:140px;height:140px;margin:0 auto 20px;}
+.ring-svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:rgba(255,255,255,.1);stroke-width:10;}
+.ring-fill{fill:none;stroke:var(--gold2);stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset 1.2s ease;stroke-dasharray:377;stroke-dashoffset:377;}
+.ring-val{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;}
+.ring-num{font-family:'Playfair Display',serif;font-size:36px;font-weight:900;color:var(--white);line-height:1;}
+.ring-lbl{font-size:10px;font-weight:800;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.06em;}
+
+/* BUTTONS */
+.btn{width:100%;padding:16px;border-radius:14px;font-family:'Inter',sans-serif;font-size:15px;font-weight:800;cursor:pointer;border:none;letter-spacing:.01em;transition:all .15s;}
+.btn:active{transform:scale(.97);}
+.bgold{background:var(--gold);color:var(--white);box-shadow:0 4px 16px rgba(201,137,58,.35);}
+.bnavy{background:var(--navy);color:var(--white);}
+.bghost{background:transparent;color:var(--ink3);border:1.5px solid var(--border);}
+.bsm{padding:10px 16px;font-size:12px;border-radius:10px;width:auto;font-weight:700;}
+.brow{display:flex;gap:10px;margin-top:14px;}
+.brow .btn{flex:1;}
+
+/* INPUTS */
+.fg{margin-bottom:15px;}
+.fl{font-size:11px;font-weight:800;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:6px;}
+.fi{width:100%;padding:13px 15px;border:1.5px solid var(--border);border-radius:12px;font-family:'Inter',sans-serif;font-size:15px;font-weight:600;color:var(--ink);background:var(--white);outline:none;transition:border-color .18s;-webkit-appearance:none;}
+.fi:focus{border-color:var(--navy);}
+.pfx{position:relative;}
+.pfx span{position:absolute;left:15px;top:50%;transform:translateY(-50%);font-size:13px;font-weight:700;color:var(--ink3);}
+.pfx .fi{padding-left:42px;}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+/* OPTION BUTTONS */
+.opt{width:100%;padding:15px 17px;border-radius:13px;border:1.5px solid var(--border);background:var(--white);font-family:'Inter',sans-serif;font-size:14px;font-weight:600;color:var(--ink2);cursor:pointer;text-align:left;margin-bottom:9px;transition:all .18s;line-height:1.4;display:flex;align-items:center;gap:10px;}
+.opt:hover{border-color:var(--navy);background:#F8F9FB;}
+.opt.sel{border-color:var(--gold);background:#FEF9F2;color:var(--gold);}
+.opt-ic{font-size:18px;flex-shrink:0;}
+.opt-no{border-color:var(--green);background:var(--green2);color:var(--green);}
+
+/* SLIDER */
+.slwrap{padding:8px 0 4px;}
+input[type=range]{-webkit-appearance:none;width:100%;height:6px;border-radius:3px;background:linear-gradient(to right,var(--coral) 0%,var(--amber) 50%,var(--green) 100%);outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:var(--white);border:3px solid var(--navy);box-shadow:0 2px 10px rgba(0,0,0,.2);cursor:pointer;}
+.sllabs{display:flex;justify-content:space-between;margin-top:7px;}
+.sllabs span{font-size:11px;font-weight:700;}
+
+/* RUNWAY */
+.runway-card{background:linear-gradient(135deg,var(--navy),var(--navy3));border-radius:18px;padding:22px;margin-bottom:14px;}
+.rw-track{height:10px;background:rgba(255,255,255,.1);border-radius:5px;overflow:hidden;margin:14px 0 8px;position:relative;}
+.rw-protected{height:100%;border-radius:5px;background:linear-gradient(90deg,#38A169,#4ADE80);transition:width 1s ease;position:absolute;left:0;top:0;opacity:.6;}
+.rw-current{height:100%;border-radius:5px;background:linear-gradient(90deg,#E53E3E,#F97316);transition:width 1s ease;position:absolute;left:0;top:0;}
+.rw-big{font-family:'Playfair Display',serif;font-size:52px;font-weight:900;color:var(--white);line-height:1;}
+
+/* LIQUIDITY LAYERS */
+.lq-layer{padding:12px 14px;border-radius:10px;margin-bottom:8px;border:1.5px solid var(--border);}
+.lq-0{background:var(--green2);border-color:#A0D4B0;}
+.lq-1{background:var(--amber2);border-color:#F5D5A0;}
+.lq-2{background:var(--cream);border-color:var(--border);}
+.lq-title{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.lq-0 .lq-title{color:var(--green);}
+.lq-1 .lq-title{color:var(--amber);}
+.lq-2 .lq-title{color:var(--ink3);}
+
+/* EXPOSURE ITEMS (replacing "gaps") */
+.exp-item{padding:12px 14px;border-radius:10px;margin-bottom:6px;border-left:4px solid;display:flex;justify-content:space-between;align-items:flex-start;background:var(--cream);}
+.exp-h{border-left-color:var(--coral);}
+.exp-m{border-left-color:var(--amber);}
+.exp-l{border-left-color:var(--green);}
+.exp-label{font-size:14px;font-weight:800;color:var(--ink);}
+.exp-sub{font-size:11px;color:var(--ink3);margin-top:2px;line-height:1.4;}
+.exp-val{font-size:14px;font-weight:900;text-align:right;flex-shrink:0;margin-left:12px;}
+.exp-h .exp-val{color:var(--coral);}
+.exp-m .exp-val{color:var(--amber);}
+.exp-l .exp-val{color:var(--green);}
+.exp-total{background:var(--navy);border-radius:12px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:8px;}
+
+/* CALCULATION PANEL */
+.calc-panel{display:none;background:var(--slate);border-radius:10px;padding:14px;margin-top:10px;border:1px solid var(--border);}
+.calc-panel.open{display:block;}
+.calc-row{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);}
+.calc-row:last-child{border-bottom:none;font-weight:800;color:var(--navy);}
+.ci{color:var(--ink3);font-weight:500;}
+
+/* THREE PATHS */
+.path{border-radius:18px;padding:20px;margin-bottom:12px;border:2px solid transparent;cursor:pointer;transition:all .2s;}
+.path:hover{transform:translateY(-2px);box-shadow:var(--shadow);}
+.path.foundation{background:var(--coral2);border-color:#FCA5A5;}
+.path.architect{background:var(--amber2);border-color:#FCD34D;}
+.path.legacy{background:var(--green2);border-color:#6EE7B7;}
+.path.sel{border-width:3px;transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,0,0,.12);}
+.path.foundation.sel{border-color:var(--coral);}
+.path.architect.sel{border-color:var(--amber);}
+.path.legacy.sel{border-color:var(--green);}
+.pbadge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;}
+.path.foundation .pbadge{background:#FEE2E2;color:var(--coral);}
+.path.architect .pbadge{background:#FEF3C7;color:var(--amber);}
+.path.legacy .pbadge{background:#D1FAE5;color:var(--green);}
+.path-title{font-size:17px;font-weight:900;color:var(--ink);margin-bottom:5px;}
+.path-tagline{font-size:12px;color:var(--ink3);line-height:1.55;margin-bottom:14px;}
+.path-cover{font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:6px;}
+.path-prem{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;}
+.path.foundation .path-prem{color:var(--coral);}
+.path.architect .path-prem{color:var(--amber);}
+.path.legacy .path-prem{color:var(--green);}
+.path-daily{font-size:12px;color:var(--ink3);margin-top:3px;}
+.path-expand{font-size:12px;color:var(--ink3);margin-top:10px;cursor:pointer;text-decoration:underline;font-weight:600;}
+
+/* ADVISOR SCRIPT */
+.ascript{background:linear-gradient(135deg,#EEF2FF,#E0E7FF);border:1.5px solid #A5B4FC;border-radius:14px;padding:16px;margin-bottom:16px;}
+.asc-lbl{font-size:10px;font-weight:900;color:#4338CA;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;}
+.asc-txt{font-size:13px;color:#1E1B4B;font-style:italic;line-height:1.7;}
+
+/* KEY QUESTION */
+.kq{background:linear-gradient(135deg,#FEF9F2,#FFF7ED);border:1.5px solid #FDE68A;border-radius:13px;padding:14px 16px;margin:12px 0;}
+.kq-lbl{font-size:10px;font-weight:900;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;}
+.kq-txt{font-size:14px;color:var(--ink2);font-style:italic;line-height:1.7;}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.stat{background:var(--slate);border-radius:12px;padding:14px;text-align:center;border:1px solid var(--border);}
+.stat-v{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--navy);line-height:1;}
+.stat-l{font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em;margin-top:5px;}
+
+/* DIVIDER */
+.div{display:flex;align-items:center;gap:12px;margin:18px 0;}
+.div::before,.div::after{content:'';flex:1;height:1px;background:var(--border);}
+.div span{font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em;}
+
+/* TOAST */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--navy);color:var(--white);padding:11px 22px;border-radius:24px;font-size:13px;font-weight:700;opacity:0;transition:all .25s;z-index:999;white-space:nowrap;pointer-events:none;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ═══════════════════════════════════════
+   PRINT / INVESTMENT GRADE REPORT
+   ═══════════════════════════════════════ */
+@media print{
+  @page{size:A4;margin:15mm 15mm 20mm 15mm;}
+  @page:first{margin-top:0;}
+  body{background:white!important;font-size:10.5pt;line-height:1.6;}
+  .no-print{display:none!important;}
+  .scr{display:block!important;min-height:auto!important;}
+  .scr:not(#s-report){display:none!important;}
+  #s-report{display:block!important;}
+  .abar,.pwrap{display:none!important;}
+  .cnt{padding:0;max-width:100%;}
+  .card,.cdark,.cgold{box-shadow:none;break-inside:avoid;page-break-inside:avoid;}
+  .rpt-page{page-break-before:always;}
+  .rpt-page:first-child{page-break-before:auto;}
+  .rpt-section{break-inside:avoid;page-break-inside:avoid;}
+}
+
+/* REPORT STYLES */
+.rpt-cover{background:var(--navy);border-radius:0;padding:40px 36px 36px;color:var(--white);margin:-24px -18px 28px;break-inside:avoid;}
+.rpt-section{background:var(--white);border-radius:16px;border:1px solid var(--border);padding:22px;margin-bottom:14px;break-inside:avoid;}
+.rpt-sec-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--navy);padding-bottom:12px;margin-bottom:16px;border-bottom:1.5px solid var(--border);}
+.rpt-snap{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.rpt-snap-item{padding:10px 12px;background:var(--slate);border-radius:8px;border:1px solid var(--border);}
+.rpt-snap-lbl{font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;}
+.rpt-snap-val{font-size:14px;font-weight:800;color:var(--ink);margin-top:3px;}
+.rpt-gap-item{display:flex;justify-content:space-between;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--border);}
+.rpt-gap-item:last-child{border-bottom:none;}
+.rpt-priority{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--border);}
+.rpt-priority:last-child{border-bottom:none;}
+.rpt-pnum{width:26px;height:26px;border-radius:8px;background:var(--navy);color:var(--gold2);font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.rpt-step{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+.rpt-step:last-child{border-bottom:none;}
+.rpt-snum{width:28px;height:28px;border-radius:8px;background:var(--gold);color:var(--white);font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.rpt-footer{margin-top:14px;padding:16px;background:var(--cream);border-radius:12px;border:1px solid var(--border);}
+.rpt-disclaimer{font-size:10px;color:var(--ink3);line-height:1.7;padding:12px;background:var(--slate);border-radius:8px;margin-top:12px;}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════════════════════════════════════
+     S0 — CLIENT ENTRY + LIQUIDITY LAYERS
+     ═══════════════════════════════════════════ -->
+<div class="scr active" id="s0">
+  <div class="abar">
+    <div><div class="aname">Babu Raj</div><div class="acreds">Cert CII · AIA/CII UK · AIA/LIMRA USA</div></div>
+    <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:700;">FAMILY PROTECTION REVIEW</div>
+  </div>
+  <div class="pwrap"><div class="pfill" style="width:0"></div></div>
+  <div class="cnt">
+    <div style="text-align:center;padding:20px 0 16px;">
+      <div style="font-size:38px;margin-bottom:14px;">✦</div>
+      <div class="D" style="margin-bottom:8px;">A Conversation About<br>What Matters Most</div>
+      <p class="sm" style="margin-bottom:24px;">A focused 15-minute review to give your family's protection a clear picture — and a clear plan.</p>
+    </div>
+
+    <div class="card">
+      <div class="LB" style="margin-bottom:14px;">Your Details</div>
+      <div class="fg"><label class="fl">Your Name</label><input class="fi" id="cName" placeholder="e.g. Krishnan Nair"></div>
+      <div class="fg"><label class="fl">Partner's Name <span style="font-weight:400;text-transform:none;">(optional)</span></label><input class="fi" id="pName" placeholder="e.g. Priya"></div>
+      <div class="fr2">
+        <div class="fg"><label class="fl">Current Age</label><input class="fi" id="cAge" type="number" placeholder="40" oninput="updateScore()"></div>
+        <div class="fg"><label class="fl">Monthly Income (AED)</label><input class="fi" id="mInc" type="number" placeholder="20,000" oninput="updateScore()"></div>
+      </div>
+      <div class="fg"><label class="fl">Monthly Family Expenses (AED)</label><input class="fi" id="mExp" type="number" placeholder="15,000" oninput="updateScore()"></div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <div class="LB">Your Family's Liquidity</div>
+        <button onclick="toggleCalc('lqCalc')" style="font-size:11px;font-weight:700;color:var(--gold);background:var(--gold3);border:none;border-radius:6px;padding:3px 9px;cursor:pointer;">How we use this [i]</button>
+      </div>
+      <div class="calc-panel" id="lqCalc">
+        <div style="font-size:12px;color:var(--ink2);line-height:1.7;"><strong>Liquidity Haircut Model</strong><br>We apply a realistic discount to each asset based on how quickly it can be accessed without significant loss:<br><br>
+        • Cash: 100% — immediate, no haircut<br>
+        • Near-term investments (20–30 days): 90% value<br>
+        &nbsp;&nbsp;10% haircut accounts for redemption penalties and market timing<br>
+        • Property equity (60–90 days): 65% value<br>
+        &nbsp;&nbsp;35% haircut accounts for agent fees, legal costs, and fire-sale discount<br>
+        • Locked plans / DEWS: Used in retirement planning only, not runway</div>
+      </div>
+      <div style="margin-top:12px;">
+        <div class="lq-layer lq-0">
+          <div class="lq-title">Immediate (0–48 hours) · No Haircut</div>
+          <div class="pfx fg" style="margin-bottom:0;"><span>AED</span><input class="fi" id="lqCash" type="number" placeholder="25,000" oninput="updateScore()"></div>
+        </div>
+        <div class="lq-layer lq-1">
+          <div class="lq-title">Near-Term (5–30 days) · 10% Haircut</div>
+          <div class="sm" style="margin-bottom:8px;">Investments, fixed deposits, liquid funds — including your investment portfolio</div>
+          <div class="pfx fg" style="margin-bottom:0;"><span>AED</span><input class="fi" id="lqInvest" type="number" placeholder="1,000,000" oninput="updateScore()"></div>
+        </div>
+        <div class="lq-layer lq-2">
+          <div class="lq-title">Medium-Term (30–90 days) · 35% Haircut</div>
+          <div class="sm" style="margin-bottom:8px;">Property equity, business assets</div>
+          <div class="pfx fg" style="margin-bottom:0;"><span>AED</span><input class="fi" id="lqProp" type="number" placeholder="0" oninput="updateScore()"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="LB" style="margin-bottom:14px;">Existing Protection</div>
+      <div class="fr2">
+        <div class="fg"><label class="fl">Life Cover (AED)</label><input class="fi" id="exLife" type="number" placeholder="0" oninput="updateScore()"></div>
+        <div class="fg"><label class="fl">Critical Illness (AED)</label><input class="fi" id="exCI" type="number" placeholder="0" oninput="updateScore()"></div>
+      </div>
+      <div class="fr2">
+        <div class="fg"><label class="fl">Disability Monthly (AED)</label><input class="fi" id="exDisMo" type="number" placeholder="0" oninput="updateScore()"></div>
+        <div class="fg"><label class="fl">Disability Lump Sum (AED)</label><input class="fi" id="exDisLs" type="number" placeholder="0" oninput="updateScore()"></div>
+      </div>
+      <div class="fg"><label class="fl">DEWS / End of Service Gratuity (AED)</label><input class="fi" id="exDews" type="number" placeholder="0" oninput="updateScore()"></div>
+    </div>
+
+    <div class="card">
+      <div class="LB" style="margin-bottom:14px;">Family & Goals</div>
+      <div class="fr2">
+        <div class="fg"><label class="fl">Number of Children</label><input class="fi" id="nKids" type="number" placeholder="2" min="0" oninput="updateScore()"></div>
+        <div class="fg"><label class="fl">Youngest Child Age</label><input class="fi" id="kidAge" type="number" placeholder="8" oninput="updateScore()"></div>
+      </div>
+      <div class="fr2">
+        <div class="fg"><label class="fl">Planned Retirement Age</label><input class="fi" id="retAge" type="number" placeholder="60" oninput="updateScore()"></div>
+        <div class="fg"><label class="fl">Retirement Country</label>
+          <select class="fi" id="retCountry" onchange="updateScore()">
+            <option value="3.5">UAE / Gulf</option>
+            <option value="5">India / South Asia</option>
+            <option value="3">UK / Europe</option>
+            <option value="2.5">Australia / Canada</option>
+          </select>
+        </div>
+      </div>
+      <div class="div"><span>Important Checks</span></div>
+      <div class="fg">
+        <label class="fl">Do you have a valid Will?</label>
+        <div style="display:flex;gap:8px;">
+          <button class="btn bghost bsm will-btn" onclick="selWill(this,'yes')" data-val="yes">Yes, registered</button>
+          <button class="btn bghost bsm will-btn" onclick="selWill(this,'no')" data-val="no">Not yet</button>
+          <button class="btn bghost bsm will-btn" onclick="selWill(this,'home')" data-val="home">Home country only</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="scorePreview" style="display:none;margin-bottom:14px;">
+      <div class="cdark">
+        <div class="LBg" style="margin-bottom:8px;">Protection Score · Live Preview</div>
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 120 120" width="140" height="140">
+            <circle class="ring-bg" cx="60" cy="60" r="50"/>
+            <circle class="ring-fill" id="previewRing" cx="60" cy="60" r="50"/>
+          </svg>
+          <div class="ring-val">
+            <div class="ring-num" id="previewScore">—</div>
+            <div class="ring-lbl">/ 100</div>
+          </div>
+        </div>
+        <div style="text-align:center;font-size:13px;color:rgba(255,255,255,.65);font-weight:600;" id="previewMsg">Enter your details above</div>
+      </div>
+    </div>
+
+    <button class="btn bgold" onclick="go('s1')">Begin the Conversation →</button>
+    <p class="sm" style="text-align:center;margin-top:14px;">Confidential · No data stored externally</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     S1 — PILLOW TEST
+     ═══════════════════════════════════════════ -->
+<div class="scr" id="s1">
+  <div class="abar">
+    <div><div class="aname">Babu Raj</div><div class="acreds">Family Protection Review</div></div>
+    <div style="font-size:11px;color:rgba(255,255,255,.3);">Step 1 of 4</div>
+  </div>
+  <div class="pwrap"><div class="pfill" style="width:25%"></div></div>
+  <div class="cnt">
+    <div class="ascript">
+      <div class="asc-lbl">Advisor — say this out loud</div>
+      <div class="asc-txt">"<span id="s1Name">Krishnan</span>, before we look at any numbers — I want to ask you something personal first."</div>
+    </div>
+    <div class="card">
+      <div class="LB" style="margin-bottom:8px;">The Pillow Test</div>
+      <div class="D2" style="margin-bottom:8px;">When your head hits the pillow tonight — what's the one financial <em>what-if</em> that comes to mind?</div>
+      <p class="sm" style="margin-bottom:20px;">No wrong answers. This shapes where we focus.</p>
+
+      <button class="opt" onclick="selPillow(this,'protection')"><span class="opt-ic">🏡</span><span>Something happening to me — who takes care of them?</span></button>
+      <button class="opt" onclick="selPillow(this,'education')"><span class="opt-ic">🎓</span><span>Will I be able to fund my children's education properly?</span></button>
+      <button class="opt" onclick="selPillow(this,'income')"><span class="opt-ic">⚡</span><span>What if I'm too ill to work for a long period?</span></button>
+      <button class="opt" onclick="selPillow(this,'retirement')"><span class="opt-ic">🌅</span><span>Will I have enough to retire with dignity?</span></button>
+      <button class="opt" onclick="selPillow(this,'unclear')"><span class="opt-ic">🧭</span><span>Honestly, I haven't thought about it much yet.</span></button>
+      <button class="opt opt-no" onclick="selPillow(this,'confident')"><span class="opt-ic">✓</span><span>I sleep fine — I feel we're in good shape.</span></button>
+    </div>
+    <div id="pillowResponse" style="display:none;" class="card"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     S2 — CONFIDENCE + ALIGNMENT
+     ═══════════════════════════════════════════ -->
+<div class="scr" id="s2">
+  <div class="abar">
+    <div><div class="aname">Babu Raj</div><div class="acreds">Family Protection Review</div></div>
+    <div style="font-size:11px;color:rgba(255,255,255,.3);">Step 2 of 4</div>
+  </div>
+  <div class="pwrap"><div class="pfill" style="width:50%"></div></div>
+  <div class="cnt">
+    <div class="ascript">
+      <div class="asc-lbl">Advisor — say this out loud</div>
+      <div class="asc-txt">"On a scale of 0 to 100 — how confident are you that your family is fully taken care of, whatever happens to you?"</div>
+    </div>
+    <div class="card">
+      <div class="LB" style="margin-bottom:16px;">Your Confidence Score</div>
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="font-family:'Playfair Display',serif;font-size:78px;font-weight:900;color:var(--navy);line-height:1;" id="confNum">50</div>
+        <div class="sm">out of 100</div>
+      </div>
+      <div class="slwrap">
+        <input type="range" min="0" max="100" value="50" oninput="updConf(this.value)" id="confSlider">
+        <div class="sllabs"><span style="color:var(--coral);">Worried</span><span style="color:var(--amber);">Unsure</span><span style="color:var(--green);">Confident</span></div>
+      </div>
+      <div id="confMsg" style="margin-top:14px;padding:13px 14px;border-radius:10px;font-size:13px;font-weight:600;color:var(--ink2);line-height:1.65;"></div>
+    </div>
+    <div class="card">
+      <div class="LB" style="margin-bottom:10px;">Spousal Alignment</div>
+      <div class="D3" style="margin-bottom:6px;">If <span id="partnerNameS2">your partner</span> answered this — how closely would their score match yours?</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;" id="alignBtns">
+        <button class="btn bghost bsm" onclick="selAlign(this,'very')">Very close</button>
+        <button class="btn bghost bsm" onclick="selAlign(this,'some')">Somewhat close</button>
+        <button class="btn bghost bsm" onclick="selAlign(this,'diff')">Quite different</button>
+      </div>
+      <div id="alignMsg" style="display:none;margin-top:10px;font-size:13px;color:var(--ink3);font-style:italic;line-height:1.65;"></div>
+    </div>
+    <button class="btn bgold" onclick="go('s3');calcAll()">Reveal the Picture →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     S3 — RUNWAY + EXPOSURES (not "gaps")
+     ═══════════════════════════════════════════ -->
+<div class="scr" id="s3">
+  <div class="abar">
+    <div><div class="aname">Babu Raj</div><div class="acreds">Family Protection Review</div></div>
+    <div style="font-size:11px;color:rgba(255,255,255,.3);">Step 3 of 4</div>
+  </div>
+  <div class="pwrap"><div class="pfill" style="width:75%"></div></div>
+  <div class="cnt">
+
+    <!-- PROTECTION SCORE -->
+    <div class="cdark" style="text-align:center;padding:28px 24px;">
+      <div class="LBg" style="margin-bottom:12px;">Your Family's Protection Score</div>
+      <div class="ring-wrap">
+        <svg class="ring-svg" viewBox="0 0 120 120" width="140" height="140">
+          <circle class="ring-bg" cx="60" cy="60" r="50"/>
+          <circle class="ring-fill" id="scoreRing" cx="60" cy="60" r="50"/>
+        </svg>
+        <div class="ring-val">
+          <div class="ring-num" id="scoreNum">—</div>
+          <div class="ring-lbl">/ 100</div>
+        </div>
+      </div>
+      <div id="scoreBand" style="font-size:14px;font-weight:700;margin-top:8px;"></div>
+      <div id="scoreVsConf" style="font-size:12px;color:rgba(255,255,255,.55);margin-top:6px;font-weight:600;"></div>
+    </div>
+
+    <!-- RUNWAY -->
+    <div class="runway-card">
+      <div class="LBg" style="margin-bottom:6px;">Your Family's Financial Runway</div>
+      <div class="rw-big" id="rwDays">—</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.6);margin-top:4px;margin-bottom:16px;" id="rwSub">calculating...</div>
+      <div class="rw-track">
+        <div class="rw-protected" id="rwProt" style="width:0%"></div>
+        <div class="rw-current" id="rwCurr" style="width:0%"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;margin-top:6px;">
+        <span style="color:rgba(232,88,88,.8);">■ Today: <span id="rwDayCurr">—</span>d</span>
+        <span style="color:rgba(74,222,128,.8);">■ With protection: <span id="rwDayProt">—</span>d</span>
+      </div>
+      <div id="day51box" style="margin-top:18px;padding:13px;background:rgba(255,255,255,.07);border-radius:11px;border-left:3px solid rgba(232,184,106,.6);">
+        <div style="font-size:10px;font-weight:800;color:var(--gold2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;">The Question That Changes Everything</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.8);font-style:italic;line-height:1.65;" id="d51txt">—</div>
+      </div>
+      <button onclick="toggleCalc('rwCalc')" style="margin-top:12px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;color:rgba(255,255,255,.6);cursor:pointer;">Show runway calculation [i]</button>
+      <div class="calc-panel" id="rwCalc" style="background:rgba(0,0,0,.2);">
+        <div id="rwCalcContent" style="font-size:12px;color:rgba(255,255,255,.7);line-height:1.8;"></div>
+      </div>
+    </div>
+
+    <!-- EXPOSURES (renamed from "gaps") -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <div class="D3">What Remains Unaddressed</div>
+        <button onclick="toggleCalc('expCalc')" style="font-size:11px;font-weight:700;color:var(--gold);background:var(--gold3);border:none;border-radius:6px;padding:3px 9px;cursor:pointer;">Show all calculations [i]</button>
+      </div>
+      <div class="calc-panel" id="expCalc" id="allCalcContent" style="margin-bottom:12px;"></div>
+
+      <div class="exp-item exp-h" id="ei-income">
+        <div><div class="exp-label">Family Income Security</div><div class="exp-sub">What your family needs if you are unable to provide</div></div>
+        <div class="exp-val" id="ev-income">—</div>
+      </div>
+      <div class="exp-item exp-h" id="ei-ci">
+        <div><div class="exp-label">Recovery Protection</div><div class="exp-sub">Income continuity during serious illness — 18 months</div></div>
+        <div class="exp-val" id="ev-ci">—</div>
+      </div>
+      <div class="exp-item exp-m" id="ei-dis">
+        <div><div class="exp-label">Disability Security</div><div class="exp-sub">Permanent income loss · No state support for expats</div></div>
+        <div class="exp-val" id="ev-dis">—</div>
+      </div>
+      <div class="exp-item exp-m" id="ei-emg">
+        <div><div class="exp-label">Emergency Buffer</div><div class="exp-sub">6-month lifestyle fund shortfall</div></div>
+        <div class="exp-val" id="ev-emg">—</div>
+      </div>
+      <div class="exp-item exp-l" id="ei-edu" style="display:none;">
+        <div><div class="exp-label">Education Fund</div><div class="exp-sub">University cost at 7% inflation · Children</div></div>
+        <div class="exp-val" id="ev-edu">—</div>
+      </div>
+      <div class="exp-item exp-l" id="ei-ret">
+        <div><div class="exp-label">Retirement Corpus</div><div class="exp-sub">Fund needed to live with dignity to age 90</div></div>
+        <div class="exp-val" id="ev-ret">—</div>
+      </div>
+
+      <div class="exp-total">
+        <div style="font-size:14px;font-weight:800;color:var(--white);">Total to Be Addressed</div>
+        <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:var(--gold2);" id="ev-total">—</div>
+      </div>
+    </div>
+
+    <!-- WILL ALERT if no will -->
+    <div id="willAlert" style="display:none;" class="card" style="border:2px solid var(--coral);">
+      <div style="font-size:13px;font-weight:800;color:var(--coral);margin-bottom:6px;">⚠️ Important: Estate Planning</div>
+      <div class="sm">Without a valid Will registered in UAE, your assets may be frozen and your children's guardianship decided by the courts — regardless of your wishes. This should be addressed alongside your protection plan.</div>
+    </div>
+
+    <button class="btn bgold" onclick="go('s4')">See the Three Paths Forward →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     S4 — THREE PATHS (Foundation/Architect/Legacy)
+     ═══════════════════════════════════════════ -->
+<div class="scr" id="s4">
+  <div class="abar">
+    <div><div class="aname">Babu Raj</div><div class="acreds">Family Protection Review</div></div>
+    <div style="font-size:11px;color:rgba(255,255,255,.3);">Step 4 of 4</div>
+  </div>
+  <div class="pwrap"><div class="pfill" style="width:90%"></div></div>
+  <div class="cnt">
+    <div class="ascript">
+      <div class="asc-lbl">Advisor — say this out loud</div>
+      <div class="asc-txt">"I want to show you three approaches — not because they're all equal, but because I want you to choose the one that reflects your values and your family's situation. Where do you see yourself?"</div>
+    </div>
+    <div class="kq">
+      <div class="kq-lbl">Premium Transparency</div>
+      <div class="kq-txt">These are indicative monthly investment ranges based on UAE market rates for your age and income. Exact premiums vary by provider and health status. I will present specific quotes from three providers at our follow-up meeting.</div>
+    </div>
+
+    <!-- FOUNDATION -->
+    <div class="path foundation" id="p-foundation" onclick="selPath('foundation')">
+      <div class="pbadge">Foundation · The Floor</div>
+      <div class="path-title">Protect What Cannot Be Replaced</div>
+      <div class="path-tagline">Income security and emergency cover. The non-negotiable minimum that ensures your family does not face financial collapse if something happens to you.</div>
+      <div class="path-cover" id="pc-foundation"></div>
+      <div class="path-prem" id="pp-foundation">—</div>
+      <div class="path-daily" id="pd-foundation">—</div>
+      <div class="path-expand" onclick="event.stopPropagation();toggleCalc('fc-foundation')">Show what this covers ↓</div>
+      <div class="calc-panel" id="fc-foundation" onclick="event.stopPropagation()"></div>
+    </div>
+
+    <!-- ARCHITECT -->
+    <div class="path architect" id="p-architect" onclick="selPath('architect')">
+      <div class="pbadge">Architect · The Wise Choice</div>
+      <div class="path-title">Design Your Family's Financial Future</div>
+      <div class="path-tagline">Full income security, recovery protection, education funding, and emergency buffer. This is what intentional families choose — not because they fear the worst, but because they value certainty.</div>
+      <div class="path-cover" id="pc-architect"></div>
+      <div class="path-prem" id="pp-architect">—</div>
+      <div class="path-daily" id="pd-architect">—</div>
+      <div class="path-expand" onclick="event.stopPropagation();toggleCalc('fc-architect')">Show what this covers ↓</div>
+      <div class="calc-panel" id="fc-architect" onclick="event.stopPropagation()"></div>
+    </div>
+
+    <!-- LEGACY -->
+    <div class="path legacy" id="p-legacy" onclick="selPath('legacy')">
+      <div class="pbadge">Legacy · The Builder's Plan</div>
+      <div class="path-title">Build Something That Outlasts a Career</div>
+      <div class="path-tagline">Everything above, plus retirement corpus, disability income protection, and intergenerational wealth foundation. The difference between leaving an inheritance and leaving a platform.</div>
+      <div class="path-cover" id="pc-legacy"></div>
+      <div class="path-prem" id="pp-legacy">—</div>
+      <div class="path-daily" id="pd-legacy">—</div>
+      <div class="path-expand" onclick="event.stopPropagation();toggleCalc('fc-legacy')">Show what this covers ↓</div>
+      <div class="calc-panel" id="fc-legacy" onclick="event.stopPropagation()"></div>
+    </div>
+
+    <div id="pathSelMsg" style="display:none;" class="card"></div>
+    <button class="btn bgold" id="pathNextBtn" style="display:none;" onclick="buildReport();go('s-report')">Generate My Family Protection Report →</button>
+    <button class="btn bghost" onclick="go('s3')" style="margin-top:8px;">← Review</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     S-REPORT — INVESTMENT GRADE DOCUMENT
+     ═══════════════════════════════════════════ -->
+<div class="scr" id="s-report">
+  <div class="abar no-print">
+    <div><div class="aname">Babu Raj</div><div class="acreds">Family Protection Review</div></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn bghost bsm no-print" onclick="window.print()" style="color:rgba(255,255,255,.6);border-color:rgba(255,255,255,.15);font-size:11px;padding:7px 14px;">🖨️ Print PDF</button>
+    </div>
+  </div>
+  <div class="pwrap no-print"><div class="pfill" style="width:100%"></div></div>
+  <div class="cnt" id="rptContent">
+
+    <!-- COVER -->
+    <div class="rpt-cover">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;">
+        <div>
+          <div style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;opacity:.45;margin-bottom:8px;">Confidential — Prepared exclusively for</div>
+          <div style="font-family:'Playfair Display',serif;font-size:30px;font-weight:900;" id="rCName">—</div>
+          <div style="font-size:12px;opacity:.5;margin-top:5px;" id="rDate">Family Protection Review</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;margin-left:14px;">
+          <div style="font-size:14px;font-weight:900;color:var(--gold2);">Babu Raj</div>
+          <div style="font-size:11px;opacity:.55;line-height:1.9;">Cert CII<br>AIA/CII UK<br>AIA/LIMRA USA</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:18px;padding-top:18px;border-top:1px solid rgba(255,255,255,.1);flex-wrap:wrap;">
+        <div><div style="font-size:10px;opacity:.45;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Protection Score</div><div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--gold2);" id="rScore">—</div></div>
+        <div><div style="font-size:10px;opacity:.45;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Total to Address</div><div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:rgba(255,255,255,.9);" id="rTotal">—</div></div>
+        <div><div style="font-size:10px;opacity:.45;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Chosen Path</div><div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:rgba(255,255,255,.9);" id="rPath">—</div></div>
+        <div><div style="font-size:10px;opacity:.45;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">Monthly Investment</div><div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:rgba(255,255,255,.9);" id="rMo">—</div></div>
+      </div>
+    </div>
+
+    <div id="rptBody"></div>
+
+    <div class="brow no-print">
+      <button class="btn bnavy" onclick="startOver()">New Review</button>
+      <button class="btn bgold" onclick="window.print()">🖨️ Save PDF</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════
+   STATE
+   ═══════════════════════════════════════ */
+var S = {
+  name:'', partner:'', age:40, inc:0, exp:0,
+  lqCash:0, lqInvest:0, lqProp:0,
+  exLife:0, exCI:0, exDisMo:0, exDisLs:0, exDews:0,
+  kids:0, kidAge:8, retAge:60, retInfl:3.5,
+  will:'no', pillow:'', conf:50, align:'very',
+  path:'', score:0,
+  exp_income:0, exp_ci:0, exp_dis:0, exp_emg:0, exp_edu:0, exp_ret:0, exp_total:0,
+  runway_cur:0, runway_prot:0
+};
+
+/* ═══════════════════════════════════════
+   UTILITIES
+   ═══════════════════════════════════════ */
+function g(id){ return document.getElementById(id); }
+function v(id){ return parseFloat(g(id)?.value)||0; }
+function vs(id){ return g(id)?.value||''; }
+function fmt(n){ if(!n||isNaN(n))return'AED 0'; return'AED '+Math.round(n).toLocaleString('en-AE'); }
+function fmtK(n){ if(!n||isNaN(n))return'AED 0'; if(n>=1000000)return'AED '+(n/1000000).toFixed(1)+'M'; if(n>=1000)return'AED '+Math.round(n/1000)+'k'; return'AED '+Math.round(n); }
+function go(id){ document.querySelectorAll('.scr').forEach(s=>s.classList.remove('active')); g(id).classList.add('active'); window.scrollTo(0,0); }
+function toast(m){ var t=g('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400); }
+function toggleCalc(id){ var el=g(id); if(el)el.classList.toggle('open'); }
+function cap(n,mx){ return Math.min(Math.max(0,n),mx); }
+
+/* ═══════════════════════════════════════
+   SCORE ENGINE (real-time)
+   ═══════════════════════════════════════ */
+function updateScore(){
+  var inc=v('mInc'), exp=v('mExp'), cash=v('lqCash'),
+      invest=v('lqInvest'), prop=v('lqProp'),
+      life=v('exLife'), ci=v('exCI'),
+      disMo=v('exDisMo'), disLs=v('exDisLs'), dews=v('exDews'),
+      age=v('cAge')||40, ret=v('retAge')||60, kids=v('nKids'), kidAge=v('kidAge');
+
+  if(!inc||!exp){ g('scorePreview').style.display='none'; return; }
+  g('scorePreview').style.display='block';
+
+  var totLq = cash + invest*0.9 + prop*0.65;
+  var yrsWork = cap(ret-age,40);
+  var yrsRet  = cap(90-ret,40);
+  var retInfl = parseFloat(vs('retCountry'))||3.5;
+
+  // Need calculations
+  var needLife  = cap(exp*12*cap(18-kidAge+2,25)+0,5000000);
+  var needCI    = cap(inc*18,2000000);
+  var needDis   = cap(inc*12*yrsWork,4000000);
+  var needEmg   = cap(exp*6,500000);
+  var needEdu   = kids>0 ? cap(kids*70000*4*Math.pow(1.07,cap(18-kidAge,18)),3000000) : 0;
+  var ri = ((1.06)/(1+retInfl/100))-1;
+  var needRet   = ri>0.001 ? cap(exp*0.7*12*((1-Math.pow(1+ri,-yrsRet))/ri),8000000) : cap(exp*0.7*12*yrsRet,8000000);
+
+  // Have
+  var haveLife  = life + totLq;
+  var haveCI    = ci + cash;
+  var haveDis   = disMo*12*yrsWork + disLs + cash;
+  var haveEmg   = cash + invest*0.9*0.5;
+  var haveRet   = dews + invest*0.9;
+
+  // Score components (0-100)
+  var sLife  = Math.min(haveLife/needLife*25,25);
+  var sCI    = Math.min(haveCI/needCI*20,20);
+  var sDis   = Math.min(haveDis/needDis*20,20);
+  var sEmg   = Math.min(haveEmg/needEmg*15,15);
+  var sRet   = Math.min(haveRet/needRet*15,15);
+  var sWill  = S.will==='yes'?5:0;
+  var score  = Math.round(sLife+sCI+sDis+sEmg+sRet+sWill);
+
+  var ring = g('previewRing');
+  var offset = 377 - (377*score/100);
+  ring.style.strokeDashoffset = offset;
+  ring.style.stroke = score<40?'#F97316':score<70?'#E8B86A':'#4ADE80';
+  g('previewScore').textContent = score;
+  var msgs = {low:'Significant exposures identified. The good news — they are all addressable.',mid:'Partially protected. A focused plan closes the remaining picture.',high:'Well structured. Let\'s confirm and document it properly.'};
+  g('previewMsg').textContent = score<40?msgs.low:score<70?msgs.mid:msgs.high;
+}
+
+/* ═══════════════════════════════════════
+   S0 — WILL + START
+   ═══════════════════════════════════════ */
+function selWill(el,val){
+  document.querySelectorAll('.will-btn').forEach(b=>{b.style.background='';b.style.color='';b.style.borderColor='';});
+  el.style.background='var(--navy)'; el.style.color='white'; el.style.borderColor='var(--navy)';
+  S.will=val;
+}
+
+/* ═══════════════════════════════════════
+   S1 — PILLOW TEST
+   ═══════════════════════════════════════ */
+function selPillow(el,answer){
+  document.querySelectorAll('.opt').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+  S.pillow=answer;
+  var responses = {
+    protection: {
+      title: 'Protection is your priority. That instinct is right.',
+      body: 'The most responsible thing a provider can do is make sure their family never has to rebuild from zero. That\'s exactly what we\'re going to map out today.',
+      next: true
+    },
+    education: {
+      title: 'Your children\'s education — a parent\'s deepest commitment.',
+      body: 'University costs are inflating at 7% globally. The gap between what you feel you\'ll need and what it will actually cost is usually the most surprising number in this review.',
+      next: true
+    },
+    income: {
+      title: 'Income continuity — the most overlooked protection gap.',
+      body: 'Surviving a serious illness without income protection is financially more damaging than most other life events. We\'ll put a precise number on this today.',
+      next: true
+    },
+    retirement: {
+      title: 'Retirement with dignity — not just survival.',
+      body: 'Most people have a retirement number in mind. Very few have calculated whether they\'re on track to reach it. Today we change that.',
+      next: true
+    },
+    unclear: {
+      title: 'Clarity is exactly what this review provides.',
+      body: 'The best time to get this picture clear is before a decision needs to be made. You\'re here at exactly the right moment.',
+      next: true
+    },
+    confident: {
+      title: 'That confidence is worth verifying and protecting.',
+      body: 'The most financially organised families I work with started exactly where you are — feeling secure. They valued having a professional confirm it in writing. Let\'s make sure the numbers match how you feel.',
+      next: true
+    }
+  };
+  var r = responses[answer];
+  var el2 = g('pillowResponse');
+  el2.style.display = 'block';
+  el2.innerHTML = '<div class="D3" style="margin-bottom:6px;">'+r.title+'</div><div class="body" style="margin-bottom:16px;">'+r.body+'</div><button class="btn bgold" onclick="go(\'s2\')">Continue →</button>';
+}
+
+/* ═══════════════════════════════════════
+   S2 — CONFIDENCE
+   ═══════════════════════════════════════ */
+function updConf(v){
+  g('confNum').textContent=v; S.conf=parseInt(v);
+  var msgs = {
+    low: '"'+getName()+', that honesty takes courage. Most people in your situation feel exactly this — and the ones who acknowledge it are the ones who act. Let\'s see what the numbers say."',
+    mid: '"That\'s a thoughtful answer. Partial confidence is where most families sit. The question is whether that\'s good enough for the people who depend on you."',
+    high: '"That\'s good to hear. The families I most respect are the ones who want to confirm their confidence with numbers. Let\'s make sure the picture matches how you feel."'
+  };
+  var level=v<35?'low':v<65?'mid':'high';
+  var el=g('confMsg');
+  el.textContent=msgs[level];
+  el.style.background=v<35?'var(--coral2)':v<65?'var(--amber2)':'var(--green2)';
+  el.style.color=v<35?'var(--coral)':v<65?'var(--amber)':'var(--green)';
+}
+function selAlign(el,val){
+  document.querySelectorAll('#alignBtns .btn').forEach(b=>{b.style.background='';b.style.color='';b.style.borderColor='';});
+  el.style.background='var(--navy)'; el.style.color='white'; S.align=val;
+  var msgs={very:'When a couple moves together on financial priorities, plans get done and stay done.',some:'A small gap is normal. The numbers tend to bring couples into alignment very quickly.',diff:'This is more common than you\'d think. Seeing the same picture together usually closes the gap.'};
+  g('alignMsg').style.display='block'; g('alignMsg').textContent=msgs[val];
+}
+
+/* ═══════════════════════════════════════
+   S3 — FULL CALCULATION ENGINE
+   ═══════════════════════════════════════ */
+function getName(){ return vs('cName').trim().split(' ')[0]||'[Client]'; }
+function getPartner(){ return vs('pName').trim()||'your partner'; }
+
+function calcAll(){
+  var name=getName(), partner=getPartner();
+  g('s1Name').textContent=name;
+  g('partnerNameS2').textContent=partner;
+
+  // Read all inputs
+  var inc=v('mInc')||20000, exp=v('mExp')||15000,
+      cash=v('lqCash'), invest=v('lqInvest'), prop=v('lqProp'),
+      life=v('exLife'), ci=v('exCI'),
+      disMo=v('exDisMo'), disLs=v('exDisLs'), dews=v('exDews'),
+      age=v('cAge')||40, retAge=v('retAge')||60,
+      kids=v('nKids'), kidAge=v('kidAge')||8,
+      retInfl=parseFloat(vs('retCountry'))||3.5;
+
+  S.name=name; S.partner=partner; S.inc=inc; S.exp=exp;
+
+  // LIQUIDITY (with haircut)
+  var lqImm  = cash;
+  var lqNear = invest*0.9;
+  var lqMed  = prop*0.65;
+  var totLq  = lqImm+lqNear+lqMed;
+
+  // RUNWAY
+  var rwCurDays = exp>0 ? Math.round((lqImm/exp)*30) : 0;
+  var rwProtDays= exp>0 ? Math.round((totLq/exp)*30) : 0;
+  S.runway_cur=rwCurDays; S.runway_prot=rwProtDays;
+
+  g('rwDays').textContent = rwCurDays+' days';
+  g('rwSub').textContent  = 'without your income, using only immediately accessible cash';
+  g('rwDayCurr').textContent = rwCurDays;
+  g('rwDayProt').textContent = rwProtDays+'+';
+  var pctCur  = Math.min(rwCurDays/1095*100,40);
+  var pctProt = Math.min(rwProtDays/1095*100,90);
+  g('rwCurr').style.width  = pctCur+'%';
+  g('rwProt').style.width  = pctProt+'%';
+
+  var dayAfter = rwCurDays+1;
+  g('d51txt').textContent = '"If something happened to you this month — what would '+partner+' need to do on day '+dayAfter+'? That is the question your protection plan answers."';
+
+  // Runway calculation detail
+  g('rwCalcContent').innerHTML =
+    '<div class="calc-row"><span class="ci">Cash in bank (immediate)</span><span>'+fmt(lqImm)+'</span></div>'+
+    '<div class="calc-row"><span class="ci">Investments × 90% haircut (20–30 days)</span><span>'+fmt(lqNear)+'</span></div>'+
+    '<div class="calc-row"><span class="ci">Property equity × 65% haircut (60–90 days)</span><span>'+fmt(lqMed)+'</span></div>'+
+    '<div class="calc-row"><span class="ci">Monthly family expenses</span><span>'+fmt(exp)+'</span></div>'+
+    '<div class="calc-row"><span>Immediate runway (cash only)</span><span>'+rwCurDays+' days</span></div>'+
+    '<div class="calc-row"><span>Protected runway (all liquidity)</span><span>'+rwProtDays+' days</span></div>';
+
+  // NEED CALCULATIONS
+  var yrsWork = cap(retAge-age,40);
+  var yrsRet  = cap(90-retAge,40);
+  var ri      = ((1.06)/(1+retInfl/100))-1;
+
+  var needLife = cap(exp*12*cap(18-kidAge+2,25),5000000);
+  var needCI   = cap(inc*18,2000000);
+  var needDis  = cap(inc*12*yrsWork,4000000);
+  var needEmg  = cap(exp*6,500000);
+  var needEdu  = kids>0?cap(kids*70000*4*Math.pow(1.07,cap(18-kidAge,18)),3000000):0;
+  var needRet  = ri>0.001?cap(exp*0.7*12*((1-Math.pow(1+ri,-yrsRet))/ri),8000000):cap(exp*0.7*12*yrsRet,8000000);
+
+  // HAVE (with haircut applied)
+  var haveLife = life + totLq;
+  var haveCI   = ci + lqImm;
+  var haveDis  = disMo*12*yrsWork + disLs + lqImm;
+  var haveEmg  = lqImm + lqNear*0.5;
+  var haveRet  = dews + lqNear;
+
+  // EXPOSURES
+  var expInc = cap(needLife-haveLife,5000000);
+  var expCI  = cap(needCI-haveCI,2000000);
+  var expDis = cap(needDis-haveDis,4000000);
+  var expEmg = cap(needEmg-haveEmg,500000);
+  var expEdu = kids>0?cap(needEdu,3000000):0;
+  var expRet = cap(needRet-haveRet,8000000);
+  var expTot = expInc+expCI+expDis+expEmg+expEdu+expRet;
+
+  S.exp_income=expInc; S.exp_ci=expCI; S.exp_dis=expDis;
+  S.exp_emg=expEmg; S.exp_edu=expEdu; S.exp_ret=expRet; S.exp_total=expTot;
+
+  // Display exposures
+  g('ev-income').textContent=fmtK(expInc);
+  g('ev-ci').textContent=fmtK(expCI);
+  g('ev-dis').textContent=fmtK(expDis);
+  g('ev-emg').textContent=fmtK(expEmg);
+  g('ev-edu').textContent=fmtK(expEdu);
+  g('ev-ret').textContent=fmtK(expRet);
+  g('ev-total').textContent=fmtK(expTot);
+  g('ei-edu').style.display=kids>0?'flex':'none';
+
+  // All calculations detail
+  g('expCalc').innerHTML =
+    '<div style="font-size:12px;font-weight:800;color:var(--ink2);margin-bottom:8px;">How Each Figure Is Calculated</div>'+
+    calcBlock('Family Income Security',
+      'Monthly expenses × 12 × '+cap(18-kidAge+2,25)+' years (until youngest child is 18+)',
+      exp+'× 12 × '+cap(18-kidAge+2,25)+' = '+fmt(needLife),
+      'Less life cover ('+fmt(life)+') + accessible assets ('+fmt(totLq)+')',
+      expInc)+
+    calcBlock('Recovery Protection',
+      'Monthly income × 18 months (typical CI recovery period)',
+      inc+' × 18 = '+fmt(needCI),
+      'Less CI cover ('+fmt(ci)+') + immediate cash ('+fmt(lqImm)+')',
+      expCI)+
+    calcBlock('Retirement Corpus',
+      'Present Value of Growing Annuity formula: PV = PMT × [1−(1+r)^−n] / r',
+      'Monthly need at retirement (70% of expenses): '+fmt(exp*0.7)+'<br>Real return: '+(ri*100).toFixed(1)+'% · Years in retirement: '+yrsRet,
+      'Less DEWS/gratuity ('+fmt(dews)+') + investments ('+fmt(lqNear)+')',
+      expRet);
+
+  // SCORE
+  var sLife=Math.min(haveLife/Math.max(needLife,1)*25,25);
+  var sCI=Math.min(haveCI/Math.max(needCI,1)*20,20);
+  var sDis=Math.min(haveDis/Math.max(needDis,1)*20,20);
+  var sEmg=Math.min(haveEmg/Math.max(needEmg,1)*15,15);
+  var sRet=Math.min(haveRet/Math.max(needRet,1)*15,15);
+  var sWill=S.will==='yes'?5:0;
+  var score=Math.round(sLife+sCI+sDis+sEmg+sRet+sWill);
+  S.score=score;
+
+  var ring=g('scoreRing');
+  var offset=377-(377*score/100);
+  ring.style.strokeDashoffset=offset;
+  ring.style.stroke=score<40?'#F97316':score<70?'#E8B86A':'#4ADE80';
+  g('scoreNum').textContent=score;
+  var band=score<40?'Significant exposures identified':score<70?'Partially protected — gaps addressable':'Well structured — confirm and document';
+  g('scoreBand').innerHTML='<span style="color:'+(score<40?'#F97316':score<70?'#E8B86A':'#4ADE80')+';">'+band+'</span>';
+
+  var confDiff=S.conf-score;
+  if(confDiff>15) g('scoreVsConf').textContent='You said '+S.conf+'% confident. The numbers show '+score+'/100. That '+confDiff+'-point gap is exactly what this review addresses.';
+  else if(confDiff>0) g('scoreVsConf').textContent='Your confidence is close to your actual position. Let\'s seal the remaining picture.';
+  else g('scoreVsConf').textContent='Your confidence is aligned with your numbers. Let\'s document it.';
+
+  // Will alert
+  g('willAlert').style.display=S.will==='no'||S.will==='home'?'block':'none';
+
+  // TIER PREMIUMS (indicative UAE market rates by age)
+  var ageRate = age<35?0.004:age<40?0.005:age<45?0.007:age<50?0.010:0.014;
+  var t1mo = Math.round(cap(expInc,1000000)*ageRate/12 + expEmg/60);
+  var t2mo = Math.round(t1mo + cap(expCI,500000)*ageRate*1.5/12 + (kids>0?expEdu/240:0));
+  var t3mo = Math.round(t2mo + expRet/Math.max(yrsWork*12,1)*0.3 + cap(expDis,2000000)*ageRate/12);
+  var d1=Math.round(t1mo/30), d2=Math.round(t2mo/30), d3=Math.round(t3mo/30);
+
+  S.tiers={t1:t1mo,t2:t2mo,t3:t3mo,d1:d1,d2:d2,d3:d3};
+  S.needLife=needLife; S.needCI=needCI; S.needDis=needDis;
+  S.needEmg=needEmg; S.needEdu=needEdu; S.needRet=needRet;
+
+  g('pp-foundation').textContent=fmt(t1mo)+'/month';
+  g('pd-foundation').textContent='AED '+d1+' per day · indicative range ±20%';
+  g('pc-foundation').textContent='Covers: Income security + Emergency buffer';
+  g('fc-foundation').innerHTML=coverList(['Life cover: '+fmtK(expInc),'Emergency fund: '+fmtK(expEmg)]);
+
+  g('pp-architect').textContent=fmt(t2mo)+'/month';
+  g('pd-architect').textContent='AED '+d2+' per day · indicative range ±20%';
+  g('pc-architect').textContent='Covers: Income + Recovery + Education + Emergency';
+  g('fc-architect').innerHTML=coverList(['Life cover: '+fmtK(expInc),'Critical illness: '+fmtK(expCI),kids>0?'Education fund: '+fmtK(expEdu):'','Emergency fund: '+fmtK(expEmg)].filter(Boolean));
+
+  g('pp-legacy').textContent=fmt(t3mo)+'/month';
+  g('pd-legacy').textContent='AED '+d3+' per day · indicative range ±20%';
+  g('pc-legacy').textContent='Covers: All above + Disability + Retirement corpus';
+  g('fc-legacy').innerHTML=coverList(['Life cover: '+fmtK(expInc),'Critical illness: '+fmtK(expCI),kids>0?'Education fund: '+fmtK(expEdu):'','Emergency fund: '+fmtK(expEmg),'Disability protection: '+fmtK(expDis),'Retirement corpus contribution'].filter(Boolean));
+}
+
+function calcBlock(title, method, calc, deduction, result){
+  return '<div style="background:var(--white);border-radius:8px;padding:10px 12px;margin-bottom:8px;border:1px solid var(--border);">'+
+    '<div style="font-size:12px;font-weight:800;color:var(--navy);margin-bottom:6px;">'+title+'</div>'+
+    '<div style="font-size:11px;color:var(--ink3);margin-bottom:3px;">Method: '+method+'</div>'+
+    '<div style="font-size:11px;color:var(--ink2);margin-bottom:3px;">'+calc+'</div>'+
+    '<div style="font-size:11px;color:var(--green);margin-bottom:3px;">'+deduction+'</div>'+
+    '<div style="font-size:12px;font-weight:800;color:var(--navy);">Amount to address: '+fmtK(result)+'</div>'+
+  '</div>';
+}
+
+function coverList(items){
+  return '<div style="margin-top:6px;">'+items.map(i=>'<div style="font-size:12px;color:var(--ink2);padding:4px 0;border-bottom:1px solid var(--border);">✓ '+i+'</div>').join('')+'</div>';
+}
+
+/* ═══════════════════════════════════════
+   S4 — PATH SELECTION
+   ═══════════════════════════════════════ */
+function selPath(path){
+  document.querySelectorAll('.path').forEach(p=>p.classList.remove('sel'));
+  g('p-'+path).classList.add('sel');
+  S.path=path;
+  var msgs={
+    foundation:{txt:'Foundation plan chosen. This is your family\'s safety floor. Everything else builds on this.',bg:'var(--coral2)',col:'var(--coral)'},
+    architect:{txt:'Architect plan chosen. This is what intentional families choose — not because they fear the worst, but because they value certainty.',bg:'var(--amber2)',col:'var(--amber)'},
+    legacy:{txt:'Legacy plan chosen. The thinking that separates families who accumulate from families who build something that outlasts them.',bg:'var(--green2)',col:'var(--green)'}
+  };
+  var m=msgs[path];
+  var el=g('pathSelMsg');
+  el.style.display='block'; el.style.background=m.bg; el.style.borderColor=m.col;
+  el.innerHTML='<div style="font-size:13px;font-weight:700;color:'+m.col+';">✓ '+m.txt+'</div>';
+  g('pathNextBtn').style.display='block';
+}
+
+/* ═══════════════════════════════════════
+   REPORT BUILDER
+   ═══════════════════════════════════════ */
+function buildReport(){
+  var today=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  var pd={foundation:{name:'Foundation',mo:S.tiers?.t1||0,col:'var(--coral)'},architect:{name:'Architect',mo:S.tiers?.t2||0,col:'var(--amber)'},legacy:{name:'Legacy',mo:S.tiers?.t3||0,col:'var(--green)'}};
+  var d=pd[S.path]||pd.architect;
+  var daily=Math.round(d.mo/30);
+
+  g('rCName').textContent=vs('cName')||S.name;
+  g('rDate').textContent='Family Protection Review · '+today;
+  g('rScore').textContent=S.score+' / 100';
+  g('rTotal').textContent=fmtK(S.exp_total);
+  g('rPath').textContent=d.name;
+  g('rMo').textContent=fmt(d.mo)+'/month';
+
+  var body=
+    // SECTION 1
+    '<div class="rpt-section rpt-page">' +
+    '<div class="rpt-sec-title">1. Your Financial Snapshot</div>'+
+    '<div class="rpt-snap">'+
+      snap('Monthly Income',fmt(S.inc))+
+      snap('Monthly Expenses',fmt(S.exp))+
+      snap('Immediate Cash Runway',S.runway_cur+' days')+
+      snap('Protected Runway (all assets)',S.runway_prot+' days')+
+      snap('Confidence Score',S.conf+' / 100')+
+      snap('Protection Score',S.score+' / 100')+
+      snap('Will Status',{yes:'Registered ✓',no:'Not yet — action required',home:'Home country only'}[S.will]||'Unknown')+
+      snap('Life Cover in Place',fmt(v('exLife')))+
+      snap('CI Cover in Place',fmt(v('exCI')))+
+      snap('Chosen Path',d.name)+
+    '</div></div>'+
+
+    // SECTION 2
+    '<div class="rpt-section rpt-page">'+
+    '<div class="rpt-sec-title">2. Protection Picture — What Remains Unaddressed</div>'+
+    rptExp('Family Income Security',S.exp_income,'If you are unable to provide — your family needs '+cap(18-v('kidAge')+2,25)+' years of living costs secured.','Urgent')+
+    rptExp('Recovery Protection (Critical Illness)',S.exp_ci,'Lost income over 18-month recovery from a serious medical diagnosis.','Urgent')+
+    rptExp('Disability Security',S.exp_dis,'Permanent income loss. No state disability support exists for UAE expats.','High')+
+    rptExp('Emergency Buffer',S.exp_emg,'6-month lifestyle fund to cover any income disruption without liquidating investments.','High')+
+    (S.exp_edu>0?rptExp('Education Fund',S.exp_edu,'University costs projected with 7% education inflation to enrolment date.','Plan'):'')+
+    rptExp('Retirement Corpus',S.exp_ret,'Capital needed to maintain your lifestyle in retirement to age 90 in your chosen country.','Plan')+
+    '<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:var(--navy);border-radius:12px;margin-top:10px;">'+
+      '<div style="font-size:14px;font-weight:800;color:var(--white);">Total to Be Addressed</div>'+
+      '<div style="font-family:\'Playfair Display\',serif;font-size:20px;font-weight:900;color:var(--gold2);">'+fmtK(S.exp_total)+'</div>'+
+    '</div></div>'+
+
+    // SECTION 3
+    '<div class="rpt-section rpt-page">'+
+    '<div class="rpt-sec-title">3. Calculation Transparency</div>'+
+    '<div style="font-size:13px;color:var(--ink3);margin-bottom:14px;line-height:1.6;">Every figure in this review is calculated using standard actuarial and financial planning methodology. Below are the exact inputs and formulas used.</div>'+
+    calcBlock2('Family Income Security','Monthly expenses × 12 × years to child independence','AED '+S.exp+' × 12 × '+cap(18-v('kidAge')+2,25)+' = '+fmt(S.needLife||0),'Less: life cover ('+fmt(v('exLife'))+') + accessible assets',S.exp_income)+
+    calcBlock2('Recovery Protection','Monthly income × recovery duration (18 months)','AED '+S.inc+' × 18 = '+fmt(S.needCI||0),'Less: existing CI cover + immediate cash',S.exp_ci)+
+    calcBlock2('Retirement Corpus','PV of Growing Annuity: PMT × [1−(1+r)^−n] ÷ r',
+      'Monthly need: '+fmt(S.exp*0.7)+' · Real return: ~2.9% · Years: '+cap(90-(v('retAge')||60),40),
+      'Less: DEWS/gratuity + investment portfolio',S.exp_ret)+
+    '</div>'+
+
+    // SECTION 4
+    '<div class="rpt-section rpt-page">'+
+    '<div class="rpt-sec-title">4. Your Chosen Path — '+d.name+'</div>'+
+    '<div style="padding:16px;background:'+d.col.replace('var(--','').replace(')','')+'20;border-radius:12px;border:2px solid '+d.col+';margin-bottom:16px;">'+
+      '<div style="font-size:11px;font-weight:800;color:'+d.col+';text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">'+d.name+' Plan</div>'+
+      '<div style="font-size:13px;color:var(--ink2);line-height:1.7;">'+
+        {foundation:'Income security and emergency cover. The non-negotiable foundation that ensures your family does not face financial collapse.',architect:'Full income security, recovery protection, education funding, and emergency buffer. The plan that intentional families choose.',legacy:'Comprehensive protection plus retirement corpus, disability income, and intergenerational wealth foundation.'}[S.path]+
+      '</div></div>'+
+    '<div style="background:linear-gradient(135deg,#0D6B3A,#15803D);border-radius:12px;padding:18px;color:white;margin-bottom:16px;">'+
+      '<div style="font-size:10px;opacity:.75;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;">Indicative Monthly Investment</div>'+
+      '<div style="font-family:\'Playfair Display\',serif;font-size:28px;font-weight:900;color:#6EE7B7;margin-bottom:6px;">'+fmt(d.mo)+' / month</div>'+
+      '<div style="font-size:12px;opacity:.85;line-height:1.7;">AED '+daily+' per day — indicative based on UAE market rates. Exact premiums provided after health assessment and provider comparison. This is approximately '+(S.inc>0?Math.round(d.mo/S.inc*100):12)+'% of monthly income — within the globally recommended 10–15% range.</div>'+
+    '</div>'+
+    '<div style="background:var(--amber2);border-radius:10px;padding:13px 14px;border:1px solid #F5D5A0;font-size:12px;color:var(--amber);line-height:1.7;">'+
+    '<strong>Premium Transparency:</strong> Indicative rates are based on UAE market averages for age '+v('cAge')+'. Actual premiums depend on health status, smoking, provider, and plan structure. I will present exact quotes from three providers at our recommendation meeting.</div>'+
+    '</div>'+
+
+    // SECTION 5
+    '<div class="rpt-section rpt-page">'+
+    '<div class="rpt-sec-title">5. Priority Action Plan</div>'+
+    rptPriority(1,'Secure income replacement cover','Your family\'s most urgent need. Without this, everything else has no foundation.')+
+    rptPriority(2,'Lock in critical illness protection','Survival without income is the modern family\'s most overlooked risk. This closes it.')+
+    rptPriority(3,'Establish the 6-month emergency buffer','The foundation everything long-term sits on. Liquid, accessible, untouched.')+
+    (S.exp_edu>0?rptPriority(4,'Begin education fund','7% inflation on education costs. Each year of delay materially increases the required monthly contribution.'):'')+
+    rptPriority(S.exp_edu>0?5:4,'Initiate retirement planning','Compound interest rewards early decisions most generously. Start now, review annually.')+
+    '</div>'+
+
+    // SECTION 6
+    '<div class="rpt-section rpt-page">'+
+    '<div class="rpt-sec-title">6. Next Steps</div>'+
+    rptStep(1,'Review and confirm this analysis','If any figure needs updating — income, expenses, existing cover — please let me know and I will revise the report before our follow-up meeting.')+
+    rptStep(2,'Product recommendation meeting (60–90 minutes)','I will prepare specific plan designs with quotes from three UAE-authorised providers per protection need. You choose, with full transparency on why I recommend what I do.')+
+    rptStep(3,'Application and underwriting','I guide you through every step. Most applications are completed in one meeting. Your health declaration is handled privately and professionally.')+
+    rptStep(4,'Annual review','This review is valid for 12 months. I recommend revisiting it every year, or when income, family, or plans change materially.')+
+    '<div class="rpt-footer">'+
+      '<div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:5px;">Prepared by</div>'+
+      '<div style="font-size:16px;font-weight:900;">Babu Raj</div>'+
+      '<div style="font-size:12px;color:var(--ink3);margin-top:3px;line-height:1.9;">Cert CII · AIA/CII UK · AIA/LIMRA USA<br>+971 56 910 2951 · thanjanbaburaj@gmail.com</div>'+
+      '<div class="rpt-disclaimer">This review is a Family Financial Protection document prepared for advisory discussion. All calculations use standard actuarial and financial planning methodology based on information provided. This document does not constitute regulated financial advice under UAE CBUAE guidelines. Product recommendations are provided separately following full suitability assessment and provider comparison. Premiums are indicative and subject to underwriting. This review was prepared in accordance with the advisor\'s professional obligations under Cert CII / AIA/CII UK standards. A record of this review has been retained in the advisor\'s files. Valid for 12 months from date of issue.</div>'+
+    '</div>'+
+    '</div>';
+
+  g('rptBody').innerHTML=body;
+}
+
+/* Report helpers */
+function snap(l,v){ return '<div class="rpt-snap-item"><div class="rpt-snap-lbl">'+l+'</div><div class="rpt-snap-val">'+v+'</div></div>'; }
+function rptExp(title,val,desc,priority){
+  var col=priority==='Urgent'?'var(--coral)':priority==='High'?'var(--amber)':'var(--green)';
+  return '<div class="rpt-gap-item"><div style="flex:1;"><div style="font-size:14px;font-weight:800;color:var(--ink);">'+title+'</div><div style="font-size:11px;color:var(--ink3);margin-top:2px;line-height:1.4;">'+desc+'</div></div><div style="text-align:right;flex-shrink:0;margin-left:14px;"><div style="font-size:14px;font-weight:900;color:'+col+';">'+fmtK(val)+'</div><div style="font-size:10px;font-weight:700;color:var(--ink3);">'+priority+'</div></div></div>';
+}
+function calcBlock2(title,method,calc,deduction,result){
+  return '<div style="padding:13px 14px;background:var(--cream);border-radius:10px;border:1px solid var(--border);margin-bottom:10px;break-inside:avoid;">'+
+    '<div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:6px;">'+title+'</div>'+
+    '<div style="font-size:11px;color:var(--ink3);margin-bottom:2px;"><em>Method:</em> '+method+'</div>'+
+    '<div style="font-size:11px;color:var(--ink2);margin-bottom:2px;">'+calc+'</div>'+
+    '<div style="font-size:11px;color:var(--green);margin-bottom:4px;">'+deduction+'</div>'+
+    '<div style="font-size:13px;font-weight:800;color:var(--navy);">Amount to address: '+fmtK(result)+'</div>'+
+  '</div>';
+}
+function rptPriority(n,title,desc){ return '<div class="rpt-priority"><div class="rpt-pnum">'+n+'</div><div><div style="font-size:14px;font-weight:800;color:var(--navy);">'+title+'</div><div style="font-size:12px;color:var(--ink3);margin-top:2px;line-height:1.55;">'+desc+'</div></div></div>'; }
+function rptStep(n,title,desc){ return '<div class="rpt-step"><div class="rpt-snum">'+n+'</div><div><div style="font-size:14px;font-weight:800;color:var(--navy);">'+title+'</div><div style="font-size:12px;color:var(--ink3);margin-top:2px;line-height:1.6;">'+desc+'</div></div></div>'; }
+
+function startOver(){
+  document.querySelectorAll('input').forEach(el=>el.value='');
+  document.querySelectorAll('.opt,.will-btn').forEach(b=>{b.classList.remove('sel');b.style.background='';b.style.color='';b.style.borderColor='';});
+  g('scorePreview').style.display='none';
+  g('pillowResponse').style.display='none';
+  g('pathSelMsg').style.display='none';
+  g('pathNextBtn').style.display='none';
+  g('confSlider').value=50; updConf(50);
+  S={name:'',partner:'',age:40,inc:0,exp:0,lqCash:0,lqInvest:0,lqProp:0,exLife:0,exCI:0,exDisMo:0,exDisLs:0,exDews:0,kids:0,kidAge:8,retAge:60,retInfl:3.5,will:'no',pillow:'',conf:50,align:'very',path:'',score:0,exp_income:0,exp_ci:0,exp_dis:0,exp_emg:0,exp_edu:0,exp_ret:0,exp_total:0,runway_cur:0,runway_prot:0};
+  go('s0');
+}
+
+updConf(50);
+</script>
+</body>
+</html>
