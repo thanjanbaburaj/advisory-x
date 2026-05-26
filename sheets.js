@@ -315,6 +315,10 @@ const U = {
     if (n.startsWith('05') || n.startsWith('04')) n = '+971' + n.slice(1);
     return n;
   },
+  firstName(name) {
+    if (!name) return '';
+    return name.trim().split(' ')[0];
+  },
   waLink(phone, msg) {
     const p = this.phone(phone).replace('+','');
     const m = encodeURIComponent(msg || '');
@@ -325,10 +329,11 @@ const U = {
   },
   msg(template, contact) {
     return template
-      .replace(/{name}/g,    contact.name    || '')
-      .replace(/{company}/g, contact.company || 'your company')
-      .replace(/{product}/g, contact.lastProduct || 'your policy')
-      .replace(/{insurer}/g, contact.lastInsurer || 'your insurer');
+      .replace(/{firstName}/g, this.firstName(contact.name))
+      .replace(/{name}/g,      contact.name    || '')
+      .replace(/{company}/g,   contact.company || 'your company')
+      .replace(/{product}/g,   contact.lastProduct || 'your policy')
+      .replace(/{insurer}/g,   contact.lastInsurer || 'your insurer');
   },
   touchMsg(contact) {
     const t = parseInt(contact.touch) || 1;
