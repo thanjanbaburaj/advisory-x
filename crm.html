@@ -41,13 +41,13 @@
       <input class="search-i" id="csInp" placeholder="Search name, company, phone, email..." oninput="renderContacts()">
     </div>
     <div style="display:flex;gap:8px;margin-bottom:12px;overflow-x:auto;padding-bottom:4px;flex-wrap:wrap;">
-      <button class="btn btn-sm btn-o" onclick="fSt('')">All</button>
-      <button class="btn btn-sm" style="background:#FDEAEA;color:#A01A1A;border:1.5px solid #F5C0C0;" onclick="fSt('hot')">🔴 Hot</button>
-      <button class="btn btn-sm" style="background:#FEF3E6;color:#B5610A;border:1.5px solid #F5D5A0;" onclick="fSt('warm')">🟡 Warm</button>
-      <button class="btn btn-sm" style="background:#E6EEFF;color:#1A3A7A;border:1.5px solid #B0C4F0;" onclick="fSt('cold')">🔵 Cold</button>
-      <button class="btn btn-sm" style="background:#E6F4EC;color:#1A6B3C;border:1.5px solid #A0D4B0;" onclick="fSt('client')">✅ Clients</button>
-      <button class="btn btn-sm" style="background:#F0E6FF;color:#4A1A7A;border:1.5px solid #C8A0F0;" onclick="fSt('proposal')">📄 Proposal</button>
-      <button class="btn btn-sm" style="background:#FFF3CD;color:#7A4A00;border:1.5px solid #F5D580;" onclick="fSt('eid')">🌙 Eid</button>
+      <button class="btn btn-sm btn-o" onclick="fSt('')" class="btn btn-sm btn-o filter-btn f-active" data-fs="">All</button>
+      <button class="btn btn-sm" style="background:#FDEAEA;color:#A01A1A;border:1.5px solid #F5C0C0;" onclick="fSt('hot')" class="btn btn-sm filter-btn" data-fs="hot">🔴 Hot</button>
+      <button class="btn btn-sm" style="background:#FEF3E6;color:#B5610A;border:1.5px solid #F5D5A0;" onclick="fSt('warm')" class="btn btn-sm filter-btn" data-fs="warm">🟡 Warm</button>
+      <button class="btn btn-sm" style="background:#E6EEFF;color:#1A3A7A;border:1.5px solid #B0C4F0;" onclick="fSt('cold')" class="btn btn-sm filter-btn" data-fs="cold">🔵 Cold</button>
+      <button class="btn btn-sm" style="background:#E6F4EC;color:#1A6B3C;border:1.5px solid #A0D4B0;" onclick="fSt('client')" class="btn btn-sm filter-btn" data-fs="client">✅ Clients</button>
+      <button class="btn btn-sm" style="background:#F0E6FF;color:#4A1A7A;border:1.5px solid #C8A0F0;" onclick="fSt('proposal')" class="btn btn-sm filter-btn" data-fs="proposal">📄 Proposal</button>
+      <button class="btn btn-sm" style="background:#FFF3CD;color:#7A4A00;border:1.5px solid #F5D580;" onclick="fSt('eid')" class="btn btn-sm filter-btn" data-fs="eid">🌙 Eid</button>
       <button class="btn btn-sm" style="background:var(--wa);color:white;border:none;" onclick="sendOccasionBatch('eid')" title="Send Eid Mubarak to all Muslim contacts">📤 Send Eid</button>
     </div>
     <div class="fg">
@@ -356,12 +356,7 @@ Action required: [edit here]">📋 Policy concern</button>
 </nav>
 
 <script>
-var SHEETS = {
-  contacts: 'Contacts',
-  logs:     'Interactions',
-  policies: 'Policies',
-  fna:      'FNA'
-};
+var SHEETS = { contacts:'Contacts', logs:'Interactions', policies:'Policies', fna:'FNA' };
 </script>
 <script src="config.js"></script>
 <script src="sheets.js"></script>
@@ -405,7 +400,13 @@ function swTab(id, el) {
   if (id === 'log')      renderLogs();
 }
 
-function fSt(s) { statusFilter = s; renderContacts(); }
+function fSt(s) {
+  statusFilter = s;
+  document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('f-active'); });
+  var ab = document.querySelector('.filter-btn[data-fs="' + s + '"]');
+  if (ab) ab.classList.add('f-active');
+  renderContacts();
+}
 
 function daysBadge(contactId) {
   var cLogs = logs.filter(function(l) { return l.contactId === contactId; });
@@ -435,13 +436,16 @@ function sendOccasionBatch(occasion) {
     var link = U.waLink(c.phone, msg);
     html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">' +
       '<div style="font-size:13px;font-weight:700;">' + c.name + '</div>' +
-      '<a href="' + link + '" target="_blank" style="background:var(--wa);color:white;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;text-decoration:none;" onclick="logOccasion(\'' + c.id + '\',\'' + occasion + '\')">💬 Send</a>' +
+      '<a href="' + link + '" target="_blank" style="background:var(--wa);color:white;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;text-decoration:none;" data-cid="' + c.id + '" data-occ="' + occasion + '" onclick="logOccasionEl(this)">💬 Send</a>' +
     '</div>';
   });
   html += '</div>';
   openMod(html);
 }
 
+function logOccasionEl(el) {
+  logOccasion(el.getAttribute('data-cid'), el.getAttribute('data-occ'));
+}
 function logOccasion(contactId, occasion) {
   var c = contacts.find(function(x){ return x.id === contactId; });
   if (!c) return;
