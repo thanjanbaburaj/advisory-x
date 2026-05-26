@@ -701,17 +701,31 @@ function calc6(){
   var retInf=parseFloat(document.getElementById('m6_inf').value)||0.035;
   var pen=parseFloat(document.getElementById('m6_pen').value)||0;
   if(!inc){document.getElementById('r6').innerHTML='';return;}
-  var accuYrs=Math.max(0,retAge-curAge);
-  var incAtRet=inc*Math.pow(1.035,accuYrs);
+  // Input guards — prevent overflow
+  curAge = Math.max(18, Math.min(curAge, 80));
+  retAge = Math.max(curAge + 1, Math.min(retAge, 85));
+  inc    = Math.min(inc, 500000); // max AED 500k/month
+  retInf = Math.min(Math.max(retInf, 0.01), 0.15); // 1%–15%
+  var accuYrs = Math.min(Math.max(0, retAge - curAge), 50);
+  var incAtRet = inc * Math.pow(1 + Math.min(0.035, retInf), accuYrs);
+  incAtRet = Math.min(incAtRet, 999999); // cap 1M/month
   var resources=C.dews+C.prop+C.sav+pen*12*25;
 
   function calcFund(toAge){
-    var dur=Math.max(0,toAge-retAge);
-    var total=0;
-    for(var y=0;y<dur;y++) total+=incAtRet*12*Math.pow(1+retInf,y);
-    var gap=Math.max(0,total-resources);
-    var mo=gap/Math.max(1,accuYrs*12);
-    return {total:Math.round(total),gap:Math.round(gap),mo:Math.round(mo),dur:dur};
+    var dur = Math.min(Math.max(0, toAge - retAge), 50); // cap 50 years max
+    // Present Value of Growing Annuity — no loop, no overflow
+    // PV = PMT × [1-(1+r)^-n] / r  when r > 0
+    var total = 0;
+    var r = Math.min(Math.max(retInf, 0.001), 0.15); // cap 0.1% to 15%
+    if (Math.abs(r) > 0.0001) {
+      total = incAtRet * 12 * ((1 - Math.pow(1 + r, -dur)) / r);
+    } else {
+      total = incAtRet * 12 * dur;
+    }
+    total = Math.min(total, 99999999); // sanity cap AED 99.9M
+    var gap = Math.max(0, total - resources);
+    var mo  = gap / Math.max(1, accuYrs * 12);
+    return {total:Math.round(total), gap:Math.round(gap), mo:Math.round(mo), dur:dur};
   }
   var base=calcFund(90);
   var stress=calcFund(95);
@@ -776,7 +790,7 @@ function generateProposal(){
     '<div style="background:linear-gradient(135deg,#0F2340,#1A3A5C);border-radius:16px;padding:20px;color:white;margin-bottom:10px;">'+
       '<div style="font-size:10px;opacity:0.6;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;margin-bottom:4px;">Financial Needs Analysis</div>'+
       '<div style="font-family:Playfair Display,serif;font-size:22px;font-weight:700;margin-bottom:3px;">'+cname+'</div>'+
-      '<div style="font-size:11px;opacity:0.55;margin-bottom:16px;">'+today+' · Babu Raj · Cert CII 99% · AIA/CII UK · AIA/LIMRA USA</div>'+
+      '<div style="font-size:11px;opacity:0.55;margin-bottom:16px;">'+today+' · Babu Raj · Cert CII · AIA/CII UK · AIA/LIMRA USA</div>'+
       (RES.m1?'<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.08);font-size:13px;"><span style="opacity:0.75;">Income Replacement</span><span style="font-weight:800;color:#E8B86A;">AED '+RES.m1.gap.toLocaleString()+'</span></div>':'')+
       (RES.m2?'<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.08);font-size:13px;"><span style="opacity:0.75;">Education Fund'+kidNames+'</span><span style="font-weight:800;color:#E8B86A;">AED '+RES.m2.total.toLocaleString()+'</span></div>':'')+
       (RES.m3?'<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.08);font-size:13px;"><span style="opacity:0.75;">Critical Illness</span><span style="font-weight:800;color:#E8B86A;">AED '+RES.m3.gap.toLocaleString()+'</span></div>':'')+
@@ -791,7 +805,7 @@ function generateProposal(){
       '<div style="font-size:12px;opacity:0.9;font-style:italic;">"Does this level of protection feel right for your family?"</div>'+
     '</div>'+
     '<div style="display:flex;gap:8px;flex-wrap:wrap;">'+
-      (selectedC&&selectedC.phone?'<a href="'+U.waLink(selectedC.phone,'Dear '+cname+',\n\nHere is a summary of your Financial Needs Analysis completed today.\n\nTotal protection gap: AED '+Math.round(total).toLocaleString()+'\n\nI will send the full report shortly.\n\n— Babu Raj\nCert CII 99% | AIA/CII UK | AIA/LIMRA USA')+'" target="_blank" class="btn btn-wa">💬 WhatsApp Summary</a>':'')+
+      (selectedC&&selectedC.phone?'<a href="'+U.waLink(selectedC.phone,'Dear '+cname+',\n\nHere is a summary of your Financial Needs Analysis completed today.\n\nTotal protection gap: AED '+Math.round(total).toLocaleString()+'\n\nI will send the full report shortly.\n\n— Babu Raj\nCert CII | AIA/CII UK | AIA/LIMRA USA')+'" target="_blank" class="btn btn-wa">💬 WhatsApp Summary</a>':'')+
       '<button onclick="saveToContact('+Math.round(total)+')" class="btn btn-p">💾 Save to Record</button>'+
     '</div>';
   document.getElementById('proposalOutput').scrollIntoView({behavior:'smooth'});
@@ -832,7 +846,7 @@ function generateReport(){
         '</div>'+
         '<div style="text-align:right;flex-shrink:0;margin-left:16px;">'+
           '<div style="font-size:13px;font-weight:800;color:#E8B86A;">Babu Raj</div>'+
-          '<div style="font-size:11px;opacity:0.7;line-height:1.7;">Cert CII 99%<br>AIA/CII UK<br>AIA/LIMRA USA</div>'+
+          '<div style="font-size:11px;opacity:0.7;line-height:1.7;">Cert CII<br>AIA/CII UK<br>AIA/LIMRA USA</div>'+
         '</div>'+
       '</div>'+
       '<div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:16px;display:flex;gap:24px;flex-wrap:wrap;">'+
@@ -896,7 +910,7 @@ function generateReport(){
       '<div style="margin-top:16px;padding:14px;background:var(--off);border-radius:10px;border:1px solid var(--border);">'+
         '<div style="font-size:13px;font-weight:800;color:var(--navy);margin-bottom:6px;">Prepared by</div>'+
         '<div style="font-size:14px;font-weight:700;">Babu Raj</div>'+
-        '<div style="font-size:12px;color:var(--ink3);line-height:1.8;">Cert CII 99% · AIA/CII UK · AIA/LIMRA USA<br>'+BR_CONFIG.PHONE+' · '+BR_CONFIG.EMAIL+'</div>'+
+        '<div style="font-size:12px;color:var(--ink3);line-height:1.8;">Cert CII · AIA/CII UK · AIA/LIMRA USA<br>'+BR_CONFIG.PHONE+' · '+BR_CONFIG.EMAIL+'</div>'+
         '<div style="font-size:11px;color:var(--ink4);margin-top:8px;line-height:1.6;font-style:italic;">This analysis is for illustrative purposes. All figures are estimates based on information provided. This document does not constitute financial advice. Actual requirements may vary based on individual circumstances, health, and applicable regulations.</div>'+
       '</div>'+
     '</div>'+
@@ -904,7 +918,7 @@ function generateReport(){
     // ── PRINT BUTTON ──
     '<div class="no-print" style="margin-bottom:20px;">'+
       '<button onclick="window.print()" class="btn btn-p btn-full" style="margin-bottom:8px;">🖨️ Print / Save as PDF</button>'+
-      (selectedC&&selectedC.phone?'<a href="'+U.waLink(selectedC.phone,'Dear '+cname+',\n\nYour Financial Needs Analysis report is ready. Total protection gap: AED '+Math.round(total).toLocaleString()+'. I will share the full report with you in our next meeting.\n\n— Babu Raj, Cert CII 99%')+'" target="_blank" class="btn btn-wa btn-full">💬 WhatsApp Client</a>':'')+'</div>';
+      (selectedC&&selectedC.phone?'<a href="'+U.waLink(selectedC.phone,'Dear '+cname+',\n\nYour Financial Needs Analysis report is ready. Total protection gap: AED '+Math.round(total).toLocaleString()+'. I will share the full report with you in our next meeting.\n\n— Babu Raj, Cert CII')+'" target="_blank" class="btn btn-wa btn-full">💬 WhatsApp Client</a>':'')+'</div>';
 
   toast('✅ Investment grade report generated');
 }
