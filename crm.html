@@ -49,6 +49,7 @@
       <button class="btn btn-sm" style="background:#E6F4EC;color:#1A6B3C;border:1.5px solid #A0D4B0;" onclick="fSt('client')" class="btn btn-sm filter-btn" data-fs="client">✅ Clients</button>
       <button class="btn btn-sm" style="background:#F0E6FF;color:#4A1A7A;border:1.5px solid #C8A0F0;" onclick="fSt('proposal')" class="btn btn-sm filter-btn" data-fs="proposal">📄 Proposal</button>
       <button class="btn btn-sm" style="background:#FFF3CD;color:#7A4A00;border:1.5px solid #F5D580;" onclick="fSt('eid')" class="btn btn-sm filter-btn" data-fs="eid">🌙 Eid</button>
+      <button class="btn btn-sm" style="background:#F0E6FF;color:#4A1A7A;border:1.5px solid #C8A0F0;" onclick="fSt('personal')" class="btn btn-sm filter-btn" data-fs="personal">👤 Personal</button>
       <button class="btn btn-sm" style="background:var(--wa);color:white;border:none;" onclick="sendOccasionBatch('eid')" title="Send Eid Mubarak to all Muslim contacts">📤 Send Eid</button>
     </div>
     <div class="fg">
@@ -194,11 +195,21 @@ Action required: [edit here]">📋 Policy concern</button>
   <div class="panel" id="tab-add">
     <div class="card">
       <div class="card-t">Add Contact</div>
+
+      <!-- Contact Type Toggle -->
+      <div style="display:flex;background:var(--off);border-radius:12px;padding:4px;margin-bottom:16px;border:1px solid var(--border);">
+        <button id="typeBiz" onclick="setContactType('business')" style="flex:1;padding:10px;border-radius:9px;border:none;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;background:#0B1E35;color:white;transition:all .18s;">💼 Business</button>
+        <button id="typePer" onclick="setContactType('personal')" style="flex:1;padding:10px;border-radius:9px;border:none;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;background:transparent;color:var(--ink3);transition:all .18s;">👤 Personal</button>
+      </div>
+      <input type="hidden" id="aType" value="business">
+
       <div class="fg"><label class="fl">Full Name *</label><input class="fi" id="aN" placeholder="Full name"></div>
       <div class="fr2">
         <div class="fg"><label class="fl">Mobile *</label><input class="fi" id="aPh" placeholder="+971..."></div>
         <div class="fg"><label class="fl">Email</label><input class="fi" id="aEm" placeholder="email@..."></div>
       </div>
+      <!-- Business fields (hidden for personal contacts) -->
+      <div id="bizFields">
       <div class="fr2">
         <div class="fg"><label class="fl">Company</label><input class="fi" id="aCo" placeholder="Employer"></div>
         <div class="fg"><label class="fl">Job Title</label><input class="fi" id="aJt" placeholder="Position"></div>
@@ -317,6 +328,7 @@ Action required: [edit here]">📋 Policy concern</button>
       </div>
       <div class="fg"><label class="fl">LinkedIn URL</label><input class="fi" id="aLi" placeholder="linkedin.com/in/..."></div>
       <div class="fg"><label class="fl">Notes</label><textarea class="ft" id="aNote" placeholder="Key things to remember..."></textarea></div>
+      </div><!-- /bizFields -->
       <button class="btn btn-p btn-full" onclick="saveContact()" style="margin-top:4px;">Save Contact</button>
     </div>
   </div>
@@ -359,11 +371,11 @@ Action required: [edit here]">📋 Policy concern</button>
 
 <!-- NAVIGATION -->
 <nav class="nav">
-  <button class="nb" onclick="location.href='today.html'"><span class="ni">🏠</span>Today</button>
-  <button class="nb active"><span class="ni">👥</span>CRM</button>
-  <button class="nb" onclick="location.href='policies.html'"><span class="ni">📋</span>Policies</button>
+  <button class="nb" onclick="location.href='today.html'"><span class="ni">📅</span>Today</button>
+  <button class="nb active" onclick="location.href='crm.html'"><span class="ni">👥</span>CRM</button>
+  <button class="nb" onclick="location.href='advisory.html'"><span class="ni">🤝</span>Advisory</button>
   <button class="nb" onclick="location.href='calculators.html'"><span class="ni">🧮</span>Calculate</button>
-  <button class="nb" onclick="comingSoon('Leads')"><span class="ni">🎯</span>Leads</button>
+  <button class="nb" onclick="location.href='policies.html'"><span class="ni">📋</span>Policies</button>
 </nav>
 
 <script>
@@ -419,6 +431,26 @@ function fSt(s) {
   var ab = document.querySelector('.filter-btn[data-fs="' + s + '"]');
   if (ab) ab.classList.add('f-active');
   renderContacts();
+}
+
+function setContactType(type) {
+  document.getElementById('aType').value = type;
+  var bizBtn = document.getElementById('typeBiz');
+  var perBtn = document.getElementById('typePer');
+  var bizFields = document.getElementById('bizFields');
+  if (type === 'personal') {
+    bizBtn.style.background = 'transparent';
+    bizBtn.style.color = 'var(--ink3)';
+    perBtn.style.background = '#0B1E35';
+    perBtn.style.color = 'white';
+    bizFields.style.display = 'none';
+  } else {
+    bizBtn.style.background = '#0B1E35';
+    bizBtn.style.color = 'white';
+    perBtn.style.background = 'transparent';
+    perBtn.style.color = 'var(--ink3)';
+    bizFields.style.display = 'block';
+  }
 }
 
 function daysBadge(contactId) {
@@ -480,8 +512,10 @@ function renderContacts() {
   var sortBy = (document.getElementById('sortBy') || {value:'score'}).value;
   var filtered = contacts.filter(function(c) {
     var ms  = !search || [c.name, c.company, c.phone, c.email].some(function(f) { return (f||'').toLowerCase().indexOf(search) > -1; });
-    var mst = !statusFilter || c.status === statusFilter ||
-               (statusFilter === 'eid' && (c.religion || '').toLowerCase() === 'muslim');
+    var mst = !statusFilter ||
+               (statusFilter === 'personal' && c.contactType === 'personal') ||
+               (statusFilter === 'eid' && (c.religion || '').toLowerCase() === 'muslim') ||
+               (statusFilter !== 'personal' && statusFilter !== 'eid' && c.status === statusFilter);
     return ms && mst;
   }).map(function(c) { return Object.assign({}, c, {_score: calcScore(c, logs)}); });
 
@@ -801,7 +835,7 @@ function renderLogs() {
 }
 
 function renderPipeline() {
-  var scored = contacts.map(function(c) { return Object.assign({}, c, {_score: calcScore(c, logs)}); });
+  var scored = contacts.filter(function(c){ return c.contactType !== 'personal'; }).map(function(c) { return Object.assign({}, c, {_score: calcScore(c, logs)}); });
   document.getElementById('pp-prospects').textContent = contacts.filter(function(c) { return c.status !== 'client'; }).length;
   document.getElementById('pp-clients').textContent   = contacts.filter(function(c) { return c.status === 'client'; }).length;
   document.getElementById('pp-hot').textContent       = contacts.filter(function(c) { return c.status === 'hot'; }).length;
@@ -861,31 +895,33 @@ async function saveContact() {
   if (document.getElementById('pGrp').checked)  prods.push('group');
   if (document.getElementById('pTak').checked)  prods.push('takaful');
 
+  var contactType = document.getElementById('aType').value || 'business';
   var c = {
     id: U.id(), name: name, phone: phone,
     email: document.getElementById('aEm').value,
-    company: document.getElementById('aCo').value,
-    jobTitle: document.getElementById('aJt').value,
+    contactType: contactType,
+    company: contactType === 'business' ? document.getElementById('aCo').value : '',
+    jobTitle: contactType === 'business' ? document.getElementById('aJt').value : '',
     nationality: nat, religion: rel,
-    yearsUAE: document.getElementById('aYrs').value,
-    ageBand: document.getElementById('aAge').value,
-    incomeBand: document.getElementById('aInc').value,
-    dependantsUAE: document.getElementById('aDep').value || '0',
-    dependantsHome: document.getElementById('aDepH').value || '0',
-    employmentType: empType,
-    status: document.getElementById('aSt').value,
-    source: document.getElementById('aSrc').value,
+    yearsUAE: contactType === 'business' ? document.getElementById('aYrs').value : '',
+    ageBand: contactType === 'business' ? document.getElementById('aAge').value : '',
+    incomeBand: contactType === 'business' ? document.getElementById('aInc').value : '',
+    dependantsUAE: contactType === 'business' ? (document.getElementById('aDep').value || '0') : '0',
+    dependantsHome: contactType === 'business' ? (document.getElementById('aDepH').value || '0') : '0',
+    employmentType: contactType === 'business' ? empType : '',
+    status: contactType === 'business' ? document.getElementById('aSt').value : 'personal',
+    source: contactType === 'business' ? document.getElementById('aSrc').value : 'Personal',
     referredBy: document.getElementById('aRefBy').value,
-    products: prods,
-    premium: document.getElementById('aPrem').value,
+    products: contactType === 'business' ? prods : [],
+    premium: contactType === 'business' ? document.getElementById('aPrem').value : '',
     followup: document.getElementById('aFu').value,
-    linkedIn: document.getElementById('aLi').value,
+    linkedIn: contactType === 'business' ? document.getElementById('aLi').value : '',
     notes: document.getElementById('aNote').value,
     touch: '1',
     dateAdded: U.today(),
     created: new Date().toISOString(),
     nriFlag: ['Indian','Pakistani','Bangladeshi','Sri Lankan','Nepali'].indexOf(nat) > -1,
-    smeFlag: ['owner','selfemployed'].indexOf(empType) > -1,
+    smeFlag: contactType === 'business' && ['owner','selfemployed'].indexOf(empType) > -1,
     takafulFlag: rel === 'Muslim' || ['Pakistani','Bangladeshi','Egyptian'].indexOf(nat) > -1,
     active: 'Yes'
   };
@@ -900,6 +936,7 @@ async function saveContact() {
   var score = calcScore(c, []);
   toast('✅ Contact saved! Lead Score: ' + score);
   swTab('contacts', document.querySelectorAll('.tab')[0]);
+  setContactType('business');
 }
 
 function cycleStatus(id) {
