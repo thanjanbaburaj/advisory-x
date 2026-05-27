@@ -28,6 +28,7 @@
   <!-- TABS -->
   <div class="tabs">
     <div class="tab active" onclick="swTab('contacts',this)">👥 Contacts</div>
+    <div class="tab" onclick="swTab('focus',this)">🎯 Focus</div>
     <div class="tab" onclick="swTab('pipeline',this)">📊 Pipeline</div>
     <div class="tab" onclick="swTab('log',this)">📝 Log</div>
     <div class="tab" onclick="swTab('add',this)">➕ Add</div>
@@ -42,7 +43,7 @@
     </div>
     <div style="display:flex;gap:8px;margin-bottom:12px;overflow-x:auto;padding-bottom:4px;flex-wrap:wrap;">
       <button class="btn btn-sm btn-o" onclick="fSt('')" class="btn btn-sm btn-o filter-btn f-active" data-fs="">All</button>
-      <button class="btn btn-sm" style="background:#FDEAEA;color:#A01A1A;border:1.5px solid #F5C0C0;" onclick="fSt('hot')" class="btn btn-sm filter-btn" data-fs="hot">🔴 Hot</button>
+      <button class="btn btn-sm" style="background:#FEF0F0;color:#C04444;border:1.5px solid #F5C0C0;" onclick="fSt('hot')" class="btn btn-sm filter-btn" data-fs="hot">🔴 Hot</button>
       <button class="btn btn-sm" style="background:#FEF3E6;color:#B5610A;border:1.5px solid #F5D5A0;" onclick="fSt('warm')" class="btn btn-sm filter-btn" data-fs="warm">🟡 Warm</button>
       <button class="btn btn-sm" style="background:#E6EEFF;color:#1A3A7A;border:1.5px solid #B0C4F0;" onclick="fSt('cold')" class="btn btn-sm filter-btn" data-fs="cold">🔵 Cold</button>
       <button class="btn btn-sm" style="background:#E6F4EC;color:#1A6B3C;border:1.5px solid #A0D4B0;" onclick="fSt('client')" class="btn btn-sm filter-btn" data-fs="client">✅ Clients</button>
@@ -61,6 +62,16 @@
     </div>
     <div style="font-size:12px;color:var(--ink3);margin-bottom:10px;font-weight:600;" id="contactCount"></div>
     <div id="contactsList"></div>
+  </div>
+
+  <!-- FOCUS PANEL -->
+  <div class="panel" id="tab-focus">
+    <div style="padding:4px 0 12px;">
+      <div style="font-size:18px;font-weight:900;color:var(--navy);margin-bottom:4px;">🎯 Focus View</div>
+      <div style="font-size:13px;color:var(--ink3);">Your overdue and due-today contacts — nothing else.</div>
+    </div>
+    <div id="focusStats" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;"></div>
+    <div id="focusList"></div>
   </div>
 
   <!-- PIPELINE PANEL -->
@@ -376,6 +387,7 @@ async function init() {
   GS.init();
   contacts = await DB.getAll('contacts');
   logs     = await DB.getAll('logs');
+  applyScoreDecay();
   renderContacts();
   renderLogs();
   renderPipeline();
@@ -396,6 +408,7 @@ function swTab(id, el) {
   document.getElementById('tab-' + id).classList.add('active');
   el.classList.add('active');
   if (id === 'contacts') renderContacts();
+  if (id === 'focus')    renderFocus();
   if (id === 'pipeline') renderPipeline();
   if (id === 'log')      renderLogs();
 }
@@ -492,7 +505,10 @@ function renderContacts() {
   if (!el) return;
 
   if (!filtered.length) {
-    el.innerHTML = '<div class="empty"><div class="empty-i">👥</div><div class="empty-t">No contacts found.<br>Add your first contact in the Add tab.</div></div>';
+    var msg = contacts.length === 0 ?
+      '<div class="empty"><div class="empty-i">👥</div><div class="empty-t">No contacts yet</div><div class="empty-s">Tap <strong>➕ Add</strong> to add your first contact,<br>or use <strong>📥 Import</strong> to upload a CSV file.</div></div>' :
+      '<div class="empty"><div class="empty-i">🔍</div><div class="empty-t">No contacts match this filter</div><div class="empty-s">Try a different filter or search term.</div></div>';
+    el.innerHTML = msg;
     return;
   }
 
@@ -508,32 +524,49 @@ function renderContacts() {
     var flags = (c.nriFlag ? '<span class="prod-b" style="background:#FEF3E6;color:#B5610A;">NRI</span>' : '') +
                 (c.smeFlag ? '<span class="prod-b p-sme">SME</span>' : '') +
                 (c.takafulFlag ? '<span class="prod-b p-grp">Takaful</span>' : '');
-    var followupBadge = c.followup ? '<span class="prod-b" style="background:#FDEAEA;color:#A01A1A;">📅 ' + U.fmt(c.followup) + '</span>' : '';
+    var followupBadge = c.followup ? '<span class="prod-b" style="background:#FEF0F0;color:#C04444;">📅 ' + U.fmt(c.followup) + '</span>' : '';
     var premiumBadge  = c.premium  ? '<span class="prod-b" style="background:#E6F4EC;color:#1A6B3C;">AED ' + Number(c.premium).toLocaleString() + '/yr</span>' : '';
     var waMsg  = U.touchMsg(c);
     var callHref = c.phone ? U.callLink(c.phone) : '#';
     var waHref   = c.phone ? U.waLink(c.phone, waMsg) : '#';
 
+    // Mini timeline — last 2 logs newest first
+  var cTimeline = logs.filter(function(l){return l.contactId===c.id;})
+    .sort(function(a,b){return (b.created||b.date)>(a.created||a.date)?1:-1;})
+    .slice(0,2);
+  var timelineHtml = cTimeline.length ?
+    '<div style="margin:8px 0;border-top:1px solid var(--border);padding-top:8px;">' +
+    cTimeline.map(function(l){
+      return '<div style="font-size:11px;padding:3px 0;display:flex;gap:8px;">' +
+        '<span style="color:var(--ink4);flex-shrink:0;">' + U.fmt(l.date) + '</span>' +
+        '<span style="color:var(--ink2);flex:1;">' + (l.note||l.channel||'').substring(0,55) + (l.note&&l.note.length>55?'…':'') + '</span>' +
+      '</div>';
+    }).join('') +
+    (logs.filter(function(l){return l.contactId===c.id;}).length>2?
+      '<div style="font-size:10px;color:var(--ink4);margin-top:2px;">+' + (logs.filter(function(l){return l.contactId===c.id;}).length-2) + ' more</div>':'') +
+    '</div>' : '';
+
     return '<div class="cc">' +
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">' +
         '<div style="flex:1;">' +
           '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-        '<div class="cc-name">' + c.name + '</div>' +
-        daysBadge(c.id) +
-        '</div>' +
+          '<div class="cc-name">' + c.name + '</div>' +
+          daysBadge(c.id) +
+          '</div>' +
           '<div class="cc-sub">' + (c.company||'') + (c.jobTitle ? ' · ' + c.jobTitle : '') + '</div>' +
-          '<div style="font-size:11px;color:var(--ink4);margin-top:3px;font-weight:600;">' + (c.nationality||'') + (c.nationality && lastContact ? ' · ' : '') + lastContact + '</div>' +
+          '<div style="font-size:11px;color:var(--ink4);margin-top:3px;font-weight:600;">' + (c.nationality||'') + (c.ageBand ? ' · ' + c.ageBand : '') + '</div>' +
         '</div>' +
-        '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;margin-left:10px;">' +
+        '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;margin-left:12px;">' +
           '<span class="badge b-' + (c.status||'cold') + '">' + (c.status||'cold') + '</span>' +
           '<div class="cc-score ' + sCls + '">' + score + '</div>' +
         '</div>' +
       '</div>' +
-      '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px;">' + prods + flags + followupBadge + premiumBadge + '</div>' +
-      '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+      '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">' + prods + flags + followupBadge + premiumBadge + '</div>' +
+      timelineHtml +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">' +
         (c.phone ? '<a href="' + callHref + '" class="act-btn act-call">📞 Call</a>' : '') +
         (c.phone ? '<a href="' + waHref + '" target="_blank" class="act-btn act-wa">💬 Touch ' + (c.touch||'1') + '</a>' : '') +
-        '<button onclick="quickLog(\'' + c.id + '\',\'' + c.name.replace(/'/g, "\\'") + '\')" class="act-btn act-log">⚡ Log</button>' +
+        '<button onclick="doLog(\'' + c.id + '\')" class="act-btn act-log">⚡ Log</button>' +
         '<button onclick="viewContact(\'' + c.id + '\')" class="act-btn act-fna">👁 View</button>' +
       '</div>' +
     '</div>';
@@ -588,11 +621,16 @@ function viewContact(id) {
     '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
       (c.phone ? '<a href="' + U.callLink(c.phone) + '" style="background:var(--blue);color:white;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:700;text-decoration:none;">📞 Call</a>' : '') +
       (c.phone ? '<a href="' + U.waLink(c.phone, U.touchMsg(c)) + '" target="_blank" style="background:var(--wa);color:white;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:700;text-decoration:none;">💬 WhatsApp</a>' : '') +
-      '<button onclick="closeMod();quickLog(\'' + c.id + '\',\'' + c.name.replace(/'/g, "\\'") + '\')" style="background:var(--navy);color:white;border:none;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">⚡ Log</button>' +
+      '<button onclick="closeMod();doLog(\'' + c.id + '\')" style="background:var(--navy);color:white;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;">⚡ Log</button>' +
       '<button onclick="cycleStatus(\'' + c.id + '\');closeMod();" style="background:var(--gold);color:white;border:none;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">Status ↻</button>' +
       '<button onclick="if(confirm(\'Delete ' + c.name.replace(/'/g, "\\'") + '?\')){deleteContact(\'' + c.id + '\');closeMod();}" style="background:var(--red);color:white;border:none;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">Delete</button>' +
     '</div>'
   );
+}
+
+function doLog(id) {
+  var c = contacts.find(function(x){ return x.id === id; });
+  if (c) quickLog(c.id, c.name);
 }
 
 function quickLog(id, name) {
@@ -1020,6 +1058,151 @@ function toast(msg, dur) {
 
 init();
 
+
+
+/* ── FOCUS VIEW ─────────────────────────────────────── */
+function renderFocus() {
+  var today = U.today();
+  var now   = new Date();
+
+  // Overdue = followup date is in the past and status not client
+  var overdue = contacts.filter(function(c) {
+    return c.followup && c.followup < today && c.status !== 'client';
+  }).sort(function(a,b){ return a.followup > b.followup ? 1 : -1; });
+
+  // Due today
+  var dueToday = contacts.filter(function(c) {
+    return c.followup === today;
+  });
+
+  // Never contacted — hot/warm with no logs
+  var neverContacted = contacts.filter(function(c) {
+    return (c.status === 'hot' || c.status === 'warm') &&
+           !logs.some(function(l){ return l.contactId === c.id; });
+  });
+
+  // Stats
+  var statsEl = document.getElementById('focusStats');
+  if (statsEl) {
+    statsEl.innerHTML =
+      focusStat(overdue.length, 'Overdue', '#C04444', '#FEF0F0') +
+      focusStat(dueToday.length, 'Due Today', '#B5610A', '#FEF3E6') +
+      focusStat(neverContacted.length, 'Never Contacted', '#1A3A7A', '#E6EEFF');
+  }
+
+  var listEl = document.getElementById('focusList');
+  if (!listEl) return;
+
+  var html = '';
+
+  if (overdue.length) {
+    html += focusSection('⚠️ Overdue', overdue, '#C04444', '#FEF0F0');
+  }
+  if (dueToday.length) {
+    html += focusSection('📅 Due Today', dueToday, '#B5610A', '#FEF3E6');
+  }
+  if (neverContacted.length) {
+    html += focusSection('👋 Hot/Warm — Never Contacted', neverContacted, '#1A3A7A', '#E6EEFF');
+  }
+
+  if (!html) {
+    html = '<div style="text-align:center;padding:48px 24px;">' +
+      '<div style="font-size:48px;margin-bottom:12px;">✅</div>' +
+      '<div style="font-size:17px;font-weight:800;color:var(--navy);margin-bottom:6px;">Nothing overdue</div>' +
+      '<div style="font-size:13px;color:var(--ink3);">All follow-ups are up to date. Check back tomorrow.</div>' +
+    '</div>';
+  }
+
+  listEl.innerHTML = html;
+}
+
+function focusStat(count, label, color, bg) {
+  return '<div style="background:' + bg + ';border-radius:12px;padding:12px 8px;text-align:center;">' +
+    '<div style="font-size:24px;font-weight:900;color:' + color + ';">' + count + '</div>' +
+    '<div style="font-size:10px;font-weight:700;color:' + color + ';text-transform:uppercase;letter-spacing:.06em;">' + label + '</div>' +
+  '</div>';
+}
+
+function focusSection(title, items, col, bg) {
+  return '<div style="margin-bottom:16px;">' +
+    '<div style="font-size:12px;font-weight:800;color:' + col + ';text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;padding:6px 10px;background:' + bg + ';border-radius:8px;">' + title + ' (' + items.length + ')</div>' +
+    items.map(function(c) {
+      var waMsg = U.touchMsg(c);
+      var lastLog = logs.filter(function(l){return l.contactId===c.id;})
+        .sort(function(a,b){return (b.date||'')>(a.date||'')?1:-1;})[0];
+      return '<div style="background:white;border-radius:12px;padding:13px 14px;margin-bottom:8px;border:1.5px solid var(--border);">' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">' +
+          '<div>' +
+            '<div style="font-size:15px;font-weight:800;color:var(--navy);">' + c.name + '</div>' +
+            '<div style="font-size:12px;color:var(--ink3);">' + (c.company||'') + '</div>' +
+          '</div>' +
+          '<div style="text-align:right;">' +
+            '<span class="badge b-' + (c.status||'cold') + '">' + (c.status||'cold') + '</span>' +
+            (c.followup ? '<div style="font-size:11px;color:' + col + ';font-weight:700;margin-top:4px;">' + (c.followup < U.today() ? 'Overdue: ' : '') + U.fmt(c.followup) + '</div>' : '') +
+          '</div>' +
+        '</div>' +
+        (lastLog ? '<div style="font-size:11px;color:var(--ink3);margin-bottom:8px;padding:6px 8px;background:var(--off);border-radius:6px;">Last: ' + U.fmt(lastLog.date) + ' — ' + (lastLog.note||lastLog.channel||'').substring(0,50) + '</div>' : '') +
+        '<div style="display:flex;gap:8px;">' +
+          (c.phone ? '<a href="' + U.waLink(c.phone, waMsg) + '" target="_blank" style="background:var(--wa);color:white;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;text-decoration:none;flex:1;text-align:center;">💬 WhatsApp</a>' : '') +
+          '<button onclick="doLog(\'' + c.id + '\')" style="background:var(--gold);color:white;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;flex:1;">⚡ Log</button>' +
+        '</div>' +
+      '</div>';
+    }).join('') +
+  '</div>';
+}
+
+/* ── LEAD SCORE DECAY ───────────────────────────────── */
+function applyScoreDecay() {
+  // -5 every 30 days without any interaction, applied at load time (visual only)
+  var now = new Date();
+  contacts = contacts.map(function(c) {
+    var cLogs = logs.filter(function(l){ return l.contactId === c.id; });
+    if (!cLogs.length) return c; // no logs — decay not applied (new contact)
+    var lastLog = cLogs.sort(function(a,b){ return (b.date||'')>(a.date||'')?1:-1; })[0];
+    var daysSince = (now - new Date(lastLog.date)) / 86400000;
+    var decayPeriods = Math.floor(daysSince / 30);
+    if (decayPeriods > 0) {
+      var decayed = Object.assign({}, c);
+      // Store base score if not already stored
+      var baseScore = parseInt(c._baseScore || calcScore(c, logs));
+      decayed._baseScore = baseScore;
+      decayed._decayedScore = Math.max(0, baseScore - (decayPeriods * 5));
+      decayed._decayNote = decayPeriods + ' × 30-day decay applied';
+      return decayed;
+    }
+    return c;
+  });
+}
+
+/* ── SWIPE ACTIONS ──────────────────────────────────── */
+(function initSwipe() {
+  var touchStartX = 0;
+  var touchEl = null;
+  document.addEventListener('touchstart', function(e) {
+    touchStartX = e.touches[0].clientX;
+    touchEl = e.target.closest('.cc');
+  }, {passive: true});
+  document.addEventListener('touchend', function(e) {
+    if (!touchEl) return;
+    var dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) < 60) return; // not a swipe
+    var id = touchEl.querySelector('[onclick*="viewContact"]');
+    if (!id) return;
+    var match = id.getAttribute('onclick').match(/viewContact\('([^']+)'\)/);
+    if (!match) return;
+    var cid = match[1];
+    var c = contacts.find(function(x){ return x.id === cid; });
+    if (!c) return;
+    if (dx > 60 && c.phone) {
+      // swipe right = WhatsApp
+      window.open(U.waLink(c.phone, U.touchMsg(c)), '_blank');
+    } else if (dx < -60) {
+      // swipe left = Log
+      quickLog(c.id, c.name);
+    }
+    touchEl = null;
+  }, {passive: true});
+})();
 </script>
 </body>
 </html>
